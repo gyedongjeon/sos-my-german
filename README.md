@@ -10,6 +10,8 @@ Stuck for words? An app for practising **spoken German**, running on your own ma
 topic, talk it through out loud with an AI partner that answers by voice, and get your German
 fixed as you go.
 
+![A conversation in SOS My German: what you said, its correction explained in Korean, and your partner's next line](docs/images/practice.png)
+
 Part of the SOS series, next to [SOS My English](https://github.com/gyedongjeon/sos-my-english),
 from which it was made, and [SOS My Interview](https://github.com/gyedongjeon/sos-my-interview).
 
@@ -93,6 +95,8 @@ settings kept. You can also choose **SOS My German → Check for Updates…**.
 ## First setup
 The app opens on the Settings page the first time.
 
+![The home page of SOS My German, with the list of topics](docs/images/home.png)
+
 1. **Feedback language**: pick the language your corrections are explained in. It starts from
    your system language.
 2. **AI model and API key**: choose a provider and model and paste that provider's API key. It is
@@ -148,6 +152,8 @@ pattern; the sentences themselves are not stored. With German as the feedback la
 short instruction in German ("Sag, dass du bereust, …") is shown in place of a sentence to translate.
 
 ### Videos
+![A video in SOS My German, cut into sentences, each with its Korean translation](docs/images/video.png)
+
 The Videos page takes a link to a YouTube video that has German subtitles. The video is played
 by YouTube's own embedded player, inside the app, and is never downloaded. The app reads the
 video's subtitles (preferring ones written by a person to automatic ones) and its title, and
