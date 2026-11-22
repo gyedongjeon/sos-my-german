@@ -279,7 +279,7 @@ replies; they run only when asked for, with a key in `backend/.env`:
 cd backend && uv run --env-file .env pytest -m live
 ```
 
-Opening a pull request into `main` runs all three suites, the live tests (with a key kept as the
+Opening a pull request into `main`, and every push to it, runs all three suites, the live tests (with a key kept as the
 repository secret `GEMINI_API_KEY`; without it they skip themselves), the frontend build, and the
 desktop type check (`.github/workflows/ci.yml`).
 
