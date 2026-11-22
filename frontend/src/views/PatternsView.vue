@@ -20,7 +20,7 @@ onMounted(() => store.load())
   <main class="mx-auto max-w-3xl p-4 sm:p-6">
     <h1 class="text-2xl font-semibold">Patterns</h1>
     <p class="text-sm text-base-content/70">
-      Pick a sentence pattern. You see a sentence in your language and say it in English, five sentences a round.
+      Pick a sentence pattern. You see a sentence in your language and say it in German, five sentences a round.
       Patterns you make from a sentence of a video are under “Yours”.
     </p>
 

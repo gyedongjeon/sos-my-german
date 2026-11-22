@@ -8,23 +8,18 @@ from .db import get_connection
 
 router = APIRouter(prefix="/api")
 
-# Short forms that are spelled differently from their words, and the ones that follow no rule.
-IRREGULAR = {"won't": "will not", "can't": "can not", "cannot": "can not", "shan't": "shall not", "let's": "let us"}
-ENDINGS = {"n't": " not", "'m": " am", "'re": " are", "'ve": " have", "'ll": " will"}
-# After these words "'s" is "is" and "'d" is "would" far more often than anything else; after any
-# other word "'s" is left alone, because it usually marks an owner ("my friend's car").
-PRONOUNS = {"i", "you", "he", "she", "it", "we", "they", "that", "there", "here", "what", "who", "where", "how"}
-
-
-# Speech recognition writes small numbers as figures or as words; both are heard the same.
+# Speech recognition writes small numbers as figures or as words; both are heard the same. Words
+# are compared with "ß" spelled "ss", so "dreißig" is listed as "dreissig".
 NUMBERS = dict(
     zip(
-        "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen "
-        "sixteen seventeen eighteen nineteen twenty thirty forty fifty sixty seventy eighty ninety".split(),
+        "null eins zwei drei vier fünf sechs sieben acht neun zehn elf zwölf dreizehn vierzehn fünfzehn "
+        "sechzehn siebzehn achtzehn neunzehn zwanzig dreissig vierzig fünfzig sechzig siebzig achtzig neunzig".split(),
         [*map(str, range(21)), "30", "40", "50", "60", "70", "80", "90"],
         strict=True,
     )
 )
+# "zwo" is said for "zwei" to tell it from "drei".
+NUMBERS["zwo"] = "2"
 
 
 class SavedCorrection(BaseModel):
@@ -38,7 +33,7 @@ class SavedCorrection(BaseModel):
     conversation_id: int | None = None
     pattern_id: str | None = None
     title: str
-    # For a pattern mistake: the sentence that was to be said in English.
+    # For a pattern mistake: the sentence that was to be said in German.
     prompt: str | None = None
     original: str
     improved: str
@@ -60,20 +55,14 @@ class Attempt(BaseModel):
 
 
 def _words(text: str) -> list[str]:
-    """The words of a sentence as heard: short forms spelled out, so "I'm" equals "I am", and
-    small numbers as figures, so "three" equals "3"."""
+    """The words of a sentence as heard: "'s" spelled out, so "geht's" equals "geht es", "ß"
+    as "ss", as Swiss German writes it, and small numbers as figures, so "drei" equals "3"."""
     words: list[str] = []
     for word in _spoken(text):
-        stem, apostrophe, ending = word.rpartition("'")
-        if word in IRREGULAR:
-            word = IRREGULAR[word]
-        elif apostrophe and stem in PRONOUNS and ending in ("s", "d"):
-            word = f"{stem} {'is' if ending == 's' else 'would'}"
-        else:
-            for short, full in ENDINGS.items():
-                if word.endswith(short) and len(word) > len(short):
-                    word = word.removesuffix(short) + full
-                    break
+        word = word.replace("ß", "ss")
+        if word.endswith("'s") and len(word) > 2:
+            # Spoken German shortens "es" after a verb or a question word: "wie geht's?"
+            word = word.removesuffix("'s") + " es"
         words.extend(NUMBERS.get(part, part) for part in word.split())
     return words
 

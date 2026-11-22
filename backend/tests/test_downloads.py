@@ -126,7 +126,7 @@ def downloads(monkeypatch):
     def voice():
         calls.append("voice")
         speech.TTS_DIR.mkdir(parents=True, exist_ok=True)
-        for name in speech.MODEL_FILES:
+        for name in speech.model_files(speech.DEFAULT_VOICE):
             (speech.TTS_DIR / name).write_bytes(b"model")
 
     def whisper():
@@ -166,7 +166,7 @@ def test_asking_for_the_downloads_starts_both(client, downloads):
 
 def test_voice_progress_counts_the_partly_downloaded_file(client):
     speech.TTS_DIR.mkdir(parents=True)
-    (speech.TTS_DIR / "kokoro-v1.0.onnx.part").write_bytes(b"x" * 1234)
+    (speech.TTS_DIR / "de_DE-thorsten-high.onnx.part").write_bytes(b"x" * 1234)
     voice = next(m for m in client.get("/api/models").json() if m["id"] == "voice")
     assert (voice["downloaded"], voice["total"]) == (1234, speech.EXPECTED_BYTES)
 
@@ -185,7 +185,7 @@ def test_transcribing_waits_for_the_model_download(downloads, monkeypatch):
     transcribe._get_model()
     # The download finished before the model was loaded.
     assert downloads == ["speech-to-text"]
-    assert loaded == ["small.en"]
+    assert loaded == ["small"]
 
 
 def test_a_failed_model_download_is_shown_to_the_ui(client, monkeypatch):

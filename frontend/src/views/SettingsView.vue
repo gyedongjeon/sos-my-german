@@ -141,7 +141,7 @@ onMounted(async () => {
         <div>
           <h2 class="card-title">Feedback language</h2>
           <p class="text-sm text-base-content/70">
-            Corrections are explained in this language. The conversation and the corrected sentences stay in English.
+            Corrections are explained in this language. The conversation and the corrected sentences stay in German.
           </p>
         </div>
         <label class="flex flex-col gap-1">

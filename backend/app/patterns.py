@@ -1,4 +1,4 @@
-"""Sentence patterns, practised by saying in English a sentence shown in the learner's language."""
+"""Sentence patterns, practised by saying in German a sentence shown in the learner's language."""
 
 from dataclasses import asdict
 
@@ -58,7 +58,7 @@ class WrittenPattern(BaseModel):
 
 class Exercise(BaseModel):
     prompt: str = Field(min_length=1, description="The sentence to say, in the learner's language.")
-    answer: str = Field(min_length=1, description="The sentence in English, using the pattern.")
+    answer: str = Field(min_length=1, description="The sentence in German, using the pattern.")
 
 
 class Exercises(BaseModel):
@@ -74,7 +74,7 @@ class Attempt(BaseModel):
 
 class Verdict(BaseModel):
     correct: bool
-    improved: str = Field(min_length=1, description="The sentence as it should be said, in English.")
+    improved: str = Field(min_length=1, description="The sentence as it should be said, in German.")
     explanation: str | None = Field(default=None, description="What to change and why; null when correct.")
 
 
@@ -90,7 +90,7 @@ class Result(BaseModel):
 
 
 EXERCISES_PROMPT = """\
-You are an English teacher preparing a speaking drill for a non-native speaker whose own
+You are a German teacher preparing a speaking drill for a non-native speaker whose own
 language is {language}. The drill practises one sentence pattern:
 
 Pattern: {pattern}
@@ -99,12 +99,12 @@ Example: {example}
 Level: {level}
 
 Write {count} different sentences that each need this pattern. The learner sees a sentence in
-{language} and says it in English.
+{language} and says it in German.
 - Everyday things a person might really say, each about a different situation and with a
   different subject or verb. Do not reuse the example.
 - Keep the vocabulary and the rest of the grammar at {level} or below, so that the pattern is
   the only hard part.
-- "answer" is the sentence in natural English, using the pattern. It is one sentence, short
+- "answer" is the sentence in natural German, using the pattern. It is one sentence, short
   enough to say in one breath.
 - "prompt" is the same sentence in natural {language}, as a native speaker would say it, not a
   word-for-word translation. {cue}
@@ -113,14 +113,15 @@ Write {count} different sentences that each need this pattern. The learner sees 
 Reply with a single JSON object matching this schema, and nothing else:
 {schema}"""
 
-# With English as the learner's language there is nothing to translate from.
+# With German as the learner's language there is nothing to translate from.
 SAME_LANGUAGE_CUE = (
-    'Because that language is English, write "prompt" as a short instruction that describes what '
-    'to say without using the pattern\'s own words, such as "Say that you regret not leaving earlier."'
+    'Because that language is German, write "prompt" as a short instruction in German that describes '
+    'what to say without using the pattern\'s own words, such as "Sag, dass du bereust, nicht früher '
+    'gegangen zu sein."'
 )
 
 CHECK_PROMPT = """\
-You are an English teacher checking one sentence of a speaking drill. The learner, whose own
+You are a German teacher checking one sentence of a speaking drill. The learner, whose own
 language is {language}, practises this sentence pattern:
 
 Pattern: {pattern}
@@ -135,7 +136,7 @@ a similar-sounding word would) as a mistake.
 correct: true when what the learner said means what the shown sentence means, uses the
 pattern, and has no mistake in grammar or word choice that a fluent speaker would notice. It
 does not have to match the model answer: other words and a different order are fine.
-improved: the sentence as it should be said, in English. Stay as close to the learner's own
+improved: the sentence as it should be said, in German. Stay as close to the learner's own
 words as a correct sentence allows; when it was correct, repeat what the learner said. When
 the learner said something that means something else than the shown sentence, give the model
 answer instead.
@@ -148,14 +149,15 @@ Reply with a single JSON object matching this schema, and nothing else:
 
 
 PATTERN_PROMPT = """\
-You are an English teacher. A learner found a sentence in a video and marked the part of it
+You are a German teacher. A learner found a sentence in a video and marked the part of it
 they want to be able to say themselves. Turn that part into a sentence pattern they can
 practise with other sentences.
 
 pattern: the pattern as a short formula, as a grammar book writes one: keep the words that
 make the pattern, and put a slot where other words can go, named by what goes there, such as
-"+ verb", "+ -ing", "+ past participle", "+ noun", or "…". For example, from "I should have
-left earlier" with "should have left" marked: "should have + past participle". At most 12 words.
+"+ infinitive", "+ past participle", "+ noun", "+ dative", "verb at the end", or "…". For
+example, from "Ich hätte früher gehen sollen" with "hätte … gehen sollen" marked:
+"hätte + infinitive + sollen". Name the slots in English. At most 12 words.
 use: what the pattern is used for, in plain English, starting with a verb in -ing, such as
 "Regretting something in the past". At most 12 words.
 
@@ -281,7 +283,7 @@ def write_exercises(pattern_id: str) -> Exercises:
         **_for_prompt(pattern),
         language=language,
         count=ROUND,
-        cue=SAME_LANGUAGE_CUE if language.strip().lower() == "english" else "",
+        cue=SAME_LANGUAGE_CUE if language.strip().lower() == "german" else "",
         schema=Exercises.model_json_schema(),
     )
     try:

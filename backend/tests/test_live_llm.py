@@ -24,30 +24,30 @@ def reply_to(client, said: str) -> dict:
 
 
 def test_reply_is_short_and_plain_enough_to_read_aloud(client):
-    reply = reply_to(client, "it was busy but good I had many meeting")["reply"]
+    reply = reply_to(client, "es war viel los aber gut ich hatte viele Meeting")["reply"]
     assert 2 <= len(reply) <= 400
     assert "\n" not in reply and "*" not in reply
 
 
 def test_a_mistake_is_corrected_and_explained_in_the_chosen_language(client):
     client.put("/api/settings", json={"feedback_language": "Korean"})
-    correction = reply_to(client, "yesterday I go to the beach with my friend and we swimmed")["correction"]
+    correction = reply_to(client, "gestern ich gehe mit meinem Freund an den Strand und wir haben geschwimmt")["correction"]
     assert correction is not None
     assert correction["improved"].strip() and correction["improved"] != correction["original"]
-    # The explanation is written in the chosen language; the better sentence stays in English.
+    # The explanation is written in the chosen language; the better sentence stays in German.
     assert re.search("[가-힣]", correction["explanation"])
     assert not re.search("[가-힣]", correction["improved"])
 
 
 def test_missing_punctuation_is_not_corrected(client):
     # Correct when spoken; only the transcript lacks the comma and the question mark.
-    assert reply_to(client, "I'm good and you")["correction"] is None
+    assert reply_to(client, "mir geht es gut und dir")["correction"] is None
 
 
-def test_a_review_is_written_in_the_chosen_language_with_english_phrases(client):
+def test_a_review_is_written_in_the_chosen_language_with_german_phrases(client):
     client.put("/api/settings", json={"feedback_language": "Korean"})
     conversation = client.post("/api/conversations", json={"topic_id": 1}).json()
-    for said in ("it was busy but good I had many meeting", "yesterday I go to the beach with my friend"):
+    for said in ("es war viel los aber gut ich hatte viele Meeting", "gestern ich gehe mit meinem Freund an den Strand"):
         client.post(f"/api/conversations/{conversation['id']}/messages", json={"text": said})
         assert client.post(f"/api/conversations/{conversation['id']}/reply").status_code == 200
     response = client.post(f"/api/conversations/{conversation['id']}/review")
@@ -56,10 +56,10 @@ def test_a_review_is_written_in_the_chosen_language_with_english_phrases(client)
     assert re.search("[가-힣]", review["summary"])
     # Both lines have a mistake, so there is something to work on.
     assert review["focus"] and all(re.search("[가-힣]", item) for item in review["focus"])
-    assert all(phrase["english"].strip() and not re.search("[가-힣]", phrase["english"]) for phrase in review["phrases"])
+    assert all(phrase["german"].strip() and not re.search("[가-힣]", phrase["german"]) for phrase in review["phrases"])
 
 
-def test_the_opening_line_of_an_own_topic_is_short_plain_english(client):
+def test_the_opening_line_of_an_own_topic_is_short_plain_german(client):
     # The learner may describe the situation in their own language.
     topic = {"title": "병원 예약", "situation": "병원 접수처에 전화해서 진료 예약을 잡는 상황. 상대는 접수 직원."}
     response = client.post("/api/topics", json=topic)
@@ -70,7 +70,7 @@ def test_the_opening_line_of_an_own_topic_is_short_plain_english(client):
     assert not re.search("[가-힣]", opener)
 
 
-def test_a_topic_made_from_an_article_in_another_language_is_in_english(client):
+def test_a_topic_made_from_an_article_in_another_language_is_not_in_that_language(client):
     article = (
         "서울시는 다음 달부터 한강 공원에서 전동 킥보드 운행을 전면 금지한다고 밝혔다. "
         "최근 2년간 공원 내 킥보드 사고가 세 배로 늘어난 데 따른 조치다. "
@@ -88,9 +88,9 @@ def test_a_topic_made_from_an_article_in_another_language_is_in_english(client):
     assert topic["opener"].rstrip().endswith("?")
 
 
-def test_pattern_sentences_are_in_the_learners_language_with_english_answers(client):
+def test_pattern_sentences_are_in_the_learners_language_with_german_answers(client):
     client.put("/api/settings", json={"feedback_language": "Korean"})
-    response = client.post("/api/patterns/should-have/exercises")
+    response = client.post("/api/patterns/haette-sollen/exercises")
     assert response.status_code == 200, response.text
     exercises = response.json()
     assert re.search("[가-힣]", exercises["note"])
@@ -98,40 +98,40 @@ def test_pattern_sentences_are_in_the_learners_language_with_english_answers(cli
     for item in exercises["items"]:
         assert re.search("[가-힣]", item["prompt"]), item
         assert not re.search("[가-힣]", item["answer"]), item
-        assert "should" in item["answer"].lower() and "have" in item["answer"].lower().replace("'ve", " have"), item
+        assert "hätte" in item["answer"].lower() and "sollen" in item["answer"].lower(), item
 
 
 def test_a_pattern_sentence_is_judged_by_its_meaning_and_grammar_not_by_the_model_answer(client):
     client.put("/api/settings", json={"feedback_language": "Korean"})
-    shown = {"prompt": "더 일찍 떠났어야 했어.", "answer": "I should have left earlier."}
+    shown = {"prompt": "더 일찍 떠났어야 했어.", "answer": "Ich hätte früher gehen sollen."}
 
     def judge(said: str) -> dict:
-        response = client.post("/api/patterns/should-have/check", json={**shown, "said": said})
+        response = client.post("/api/patterns/haette-sollen/check", json={**shown, "said": said})
         assert response.status_code == 200, response.text
         return response.json()
 
-    wrong = judge("I should have leave more early")
+    wrong = judge("ich hätte früher gehen gesollt")
     assert wrong["correct"] is False
     assert re.search("[가-힣]", wrong["explanation"]) and not re.search("[가-힣]", wrong["improved"])
     # Other words than the model answer's, but right.
-    assert judge("I should have gone sooner")["correct"] is True
+    assert judge("ich hätte eher losgehen sollen")["correct"] is True
 
 
 def test_a_marked_part_of_a_sentence_becomes_a_short_pattern(client, monkeypatch):
     from app import videos
     from app.videos import Snippet
 
-    sentence = "This is the closest I've ever gotten to a college graduation."
-    monkeypatch.setattr(videos, "_transcript", lambda video_id: ([Snippet(0.0, 5.0, sentence)], "en", False))
-    monkeypatch.setattr(videos, "_about", lambda video_id: ("A speech", "A channel"))
+    sentence = "Ich war noch nie so nah an einem Abschluss an der Uni."
+    monkeypatch.setattr(videos, "_transcript", lambda video_id: ([Snippet(0.0, 5.0, sentence)], "de", False))
+    monkeypatch.setattr(videos, "_about", lambda video_id: ("Eine Rede", "Ein Kanal"))
     line = client.post("/api/videos", json={"url": "https://youtu.be/UF8uR6Z6KLc"}).json()["lines"][0]
-    response = client.post("/api/patterns", json={"line": line["id"], "phrase": "the closest I've ever gotten to"})
+    response = client.post("/api/patterns", json={"line": line["id"], "phrase": "noch nie so nah an"})
     assert response.status_code == 201, response.text
     made = response.json()
     # Which words stay and which become a slot is the model's call; only the shape is checked.
     assert 2 <= len(made["pattern"].split()) <= 14
     # A formula, not the sentence again.
-    assert "college graduation" not in made["pattern"].lower()
+    assert "abschluss an der uni" not in made["pattern"].lower()
     assert made["use"].strip() and made["example"] == sentence
 
 
@@ -139,9 +139,9 @@ def test_searches_for_videos_like_a_saved_one_are_a_few_short_phrases(client, mo
     from app import similar_videos, videos
     from app.videos import Snippet
 
-    said = ["Stay hungry. Stay foolish.", "You can't connect the dots looking forward.", "Death is very likely the single best invention of life."]
-    monkeypatch.setattr(videos, "_transcript", lambda video_id: ([Snippet(i * 4.0, 4.0, s) for i, s in enumerate(said)], "en", False))
-    monkeypatch.setattr(videos, "_about", lambda video_id: ("Commencement address", "Stanford"))
+    said = ["Bleibt hungrig. Bleibt verrückt.", "Man kann die Punkte nicht im Voraus verbinden.", "Der Tod ist wahrscheinlich die beste Erfindung des Lebens."]
+    monkeypatch.setattr(videos, "_transcript", lambda video_id: ([Snippet(i * 4.0, 4.0, s) for i, s in enumerate(said)], "de", False))
+    monkeypatch.setattr(videos, "_about", lambda video_id: ("Eine Abschlussrede", "Uni"))
     video = client.post("/api/videos", json={"url": "https://youtu.be/UF8uR6Z6KLc"}).json()
     searched = []
     monkeypatch.setattr(similar_videos, "_search", lambda query, count: searched.append(query) or [])

@@ -58,7 +58,7 @@ def isolated(monkeypatch, request):
     else:
         monkeypatch.setattr(litellm, "completion", _no_network)
     monkeypatch.setattr(speech.urllib.request, "urlopen", _no_network)
-    monkeypatch.setattr(speech, "_kokoro", None)
+    monkeypatch.setattr(speech, "_voices", {})
     monkeypatch.setattr(transcribe, "_download", _no_network)
     monkeypatch.setattr(topics.trafilatura, "fetch_url", _no_network)
     monkeypatch.setattr(videos, "_transcript", _no_network)

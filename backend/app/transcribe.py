@@ -13,8 +13,9 @@ from huggingface_hub import HfApi
 from .downloads import Download
 from .paths import DATA_DIR
 
-# English-only model, downloaded from Hugging Face on first use (~480 MB for small.en).
-DEFAULT_MODEL = "small.en"
+# Multilingual model (the ".en" ones know English only), downloaded from Hugging Face on first
+# use (~480 MB for small).
+DEFAULT_MODEL = "small"
 # Kept with the app's other files instead of Hugging Face's shared cache in the home folder,
 # so that removing the data folder removes the model too.
 MODEL_DIR = DATA_DIR / "whisper"
@@ -98,7 +99,7 @@ def transcribe(audio: BinaryIO) -> Transcript:
     with _lock:
         # vad_filter drops silence, which otherwise makes Whisper invent text.
         segments, _ = model.transcribe(
-            audio, language="en", vad_filter=True, word_timestamps=True
+            audio, language="de", vad_filter=True, word_timestamps=True
         )
         segments = list(segments)
 

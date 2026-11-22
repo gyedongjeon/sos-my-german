@@ -29,7 +29,7 @@ Follow Kent Beck's Test-Driven Development and Tidy First.
     - Commit structural changes as `refactor:` and behavioral ones as `feat:` or `fix:`, per the commit convention.
     - Tidy only what makes the next change easier; keep each tidying small.
 - **Running the tests**:
-    - Backend: `cd backend && uv run pytest`. Tests use a temporary data folder and block network access; mock the LLM, Whisper, and Kokoro instead of calling them.
+    - Backend: `cd backend && uv run pytest`. Tests use a temporary data folder and block network access; mock the LLM, Whisper, and Piper instead of calling them.
     - Live LLM tests: `cd backend && uv run --env-file .env pytest -m live` sends a few real requests (marked `live`, skipped without a key). Keep them few, and assert the shape of a reply, never its wording. Never print, log, or commit the key.
     - Frontend: `cd frontend && npm test` (Vitest), and `npm run build` for the type check.
     - Desktop: `cd desktop && npm test` (Vitest), and `npx tsc --noEmit` for the type check.
@@ -44,7 +44,7 @@ Follow Kent Beck's Test-Driven Development and Tidy First.
 - Never modify another branch's worklog file.
 
 ## Project Mission
-- **Project**: `sos-my-german` — a speaking-first English practice app for personal use: the learner talks with an AI partner by voice and gets corrections. It is a sibling of `sos-my-interview` in the SOS series and shares its stack, look, and conventions.
+- **Project**: `sos-my-german` — a speaking-first German practice app for personal use: the learner talks with an AI partner by voice and gets corrections. It was made from `sos-my-english` and is a sibling of it and of `sos-my-interview` in the SOS series, sharing their stack, look, and conventions. The UI stays in English; what the learner hears, says, and is corrected on is German.
 - **Architecture**: Separate frontend and backend.
     - **Backend**: FastAPI (Python) with SQLite as the database.
     - **Frontend**: Vue 3 + TypeScript + Vite, with Vue Router and Pinia. Styling uses Tailwind CSS with daisyUI as the design system; prefer daisyUI component classes and theme colors over custom CSS.

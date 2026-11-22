@@ -25,7 +25,7 @@ onMounted(async () => {
       <div class="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-2 px-2">
         <RouterLink class="flex items-center gap-2 px-2 font-display text-xl" to="/">
           <BrandMark class="size-7" />
-          <span><span class="font-extrabold text-primary">SOS</span> <span class="font-medium">My English</span></span>
+          <span><span class="font-extrabold text-primary">SOS</span> <span class="font-medium">My German</span></span>
         </RouterLink>
         <ul class="menu menu-horizontal ml-auto gap-1 px-0">
           <li><RouterLink :class="LINK" to="/" exact-active-class="bg-primary text-primary-content hover:bg-primary">Conversation</RouterLink></li>
@@ -46,7 +46,7 @@ onMounted(async () => {
       role="alert"
       class="alert alert-warning alert-soft mx-auto mt-4 max-w-3xl"
     >
-      <span>Add an AI model and API key so your conversation partner can reply and correct your English.</span>
+      <span>Add an AI model and API key so your conversation partner can reply and correct your German.</span>
       <RouterLink class="btn btn-sm btn-warning" to="/settings">Open Settings</RouterLink>
     </div>
     <RouterView />

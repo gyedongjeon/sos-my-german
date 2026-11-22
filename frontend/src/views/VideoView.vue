@@ -244,7 +244,7 @@ onBeforeUnmount(() => recorder.release())
           </p>
           <div v-else-if="videos.suggestError" role="alert" class="alert alert-error alert-soft">{{ videos.suggestError }}</div>
           <p v-else-if="!videos.suggestions.length" class="text-base-content/60">
-            No videos with English subtitles at a similar level were found. Try again for other searches.
+            No videos with German subtitles at a similar level were found. Try again for other searches.
           </p>
           <ul v-else class="grid gap-2">
             <li v-for="s in videos.suggestions" :key="s.video_id" class="flex flex-wrap items-center gap-x-3 gap-y-1">

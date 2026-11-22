@@ -18,19 +18,19 @@ class Message(BaseModel):
 
 class Correction(BaseModel):
     original: str = Field(description="The phrase or sentence the learner said, quoted as-is.")
-    improved: str = Field(description="A more correct or natural way to say it, in English.")
+    improved: str = Field(description="A more correct or natural way to say it, in German.")
     explanation: str = Field(description="Why the improved version is better.")
 
 
 class TutorReply(BaseModel):
-    reply: str = Field(min_length=1, description="The tutor's next line, in English.")
+    reply: str = Field(min_length=1, description="The tutor's next line, in German.")
     correction: Correction | None = Field(
         default=None, description="The most valuable fix to the learner's latest message, or null."
     )
 
 
 SYSTEM_PROMPT = """\
-You are a friendly English conversation partner helping a non-native speaker practice
+You are a friendly German conversation partner helping a non-native speaker practice
 speaking. You are having a spoken conversation in this situation:
 {situation}
 
@@ -41,8 +41,10 @@ do not treat an obvious recognition error (a word that makes no sense where a
 similar-sounding word would) as the learner's mistake.
 
 reply: stay in the situation and respond to what the learner just said, then keep the
-conversation going, usually with one question. Keep it easy to follow by ear: one or two
-short sentences in natural, everyday English at a level slightly above the learner's.
+conversation going, usually with one question. Use "du" or "Sie" as the situation calls for
+(friends, family, and classmates say "du"; staff, officials, and strangers say "Sie"), and keep
+to it. Keep it easy to follow by ear: one or two
+short sentences in natural, everyday German at a level slightly above the learner's.
 Plain text only, with no formatting, because it is read aloud to the learner as-is. Do not
 correct the learner here.
 
@@ -54,8 +56,8 @@ already fine, or the only difference would be punctuation or capitals, use null;
 invent a problem. In "explanation", talk about what to say, not how to write it.
 
 Write "explanation" in {language}: the learner reads it in {language}, even though the
-conversation is in English, and English examples may be quoted inside it. Keep "reply",
-"original", and "improved" in English.
+conversation is in German, and German examples may be quoted inside it. Keep "reply",
+"original", and "improved" in German.
 
 Reply with a single JSON object matching this schema, and nothing else:
 {schema}"""

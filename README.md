@@ -6,13 +6,12 @@
 [![CI](https://github.com/gyedongjeon/sos-my-german/actions/workflows/ci.yml/badge.svg)](https://github.com/gyedongjeon/sos-my-german/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-Stuck for words? An app for practising **spoken English**, running on your own machine. Pick a
-topic, talk it through out loud with an AI partner that answers by voice, and get your English
+Stuck for words? An app for practising **spoken German**, running on your own machine. Pick a
+topic, talk it through out loud with an AI partner that answers by voice, and get your German
 fixed as you go.
 
-![A conversation in SOS My German: what you said, its correction, and your partner's next line](docs/images/practice.png)
-
-Part of the SOS series, next to [SOS My Interview](https://github.com/gyedongjeon/sos-my-interview).
+Part of the SOS series, next to [SOS My English](https://github.com/gyedongjeon/sos-my-english),
+from which it was made, and [SOS My Interview](https://github.com/gyedongjeon/sos-my-interview).
 
 ## Features
 - **Speaking first**: you answer by voice, not by typing; what you said is transcribed for you.
@@ -21,12 +20,12 @@ Part of the SOS series, next to [SOS My Interview](https://github.com/gyedongjeo
 - **How clearly you spoke**: each line shows a clarity score, the words that were hard to recognize, and your pace.
 - **A summary at the end**: wrap a conversation up to see how it went: what you did well, what to work on next, and a few expressions worth trying next time.
 - **40 topics in 9 categories**: everyday chat, work, school, shopping, food, travel, services, home, and giving your opinion.
-- **Sentence patterns by level**: 100 patterns from A1 to C2. You see a sentence in your own language and say it in English, five sentences a round, and each one is checked.
+- **Sentence patterns by level**: 100 patterns from A1 to C2. You see a sentence in your own language and say it in German, five sentences a round, and each one is checked.
 - **Study with YouTube videos**: paste a link and listen to the video one sentence at a time, with repeat, slower speeds, and the text hidden or shown. Say a sentence after the speaker to see which words came through, and search all your videos for a phrase to hear how it is used. Mark an expression in a sentence to turn it into a pattern of your own and practise it. Videos are tagged with a level from A1 to C2 and can be listed level by level, and a video can suggest others like it at a similar level.
 - **Your own topics**: add the situations you need (a job interview, renting a car, a call with a client) next to the built-in ones.
 - **Practise your corrections**: every fix is collected on the Corrections page, where you say the better sentence aloud until it comes out right.
 - **History**: every conversation is saved as you have it, with its corrections, so you can read it and hear it again.
-- **Explanations in your language**: corrections are explained in Korean, Japanese, Chinese, Spanish, and more; the conversation stays in English.
+- **Explanations in your language**: corrections are explained in Korean, English, Japanese, Chinese, and more; the conversation stays in German. Your partner says "du" or "Sie" as the situation calls for.
 - **Topics from what you read**: paste a link to an article or a speech, or its text, and get a topic to discuss it, with a short summary to talk from.
 - **Private by default**: speech-to-text and your partner's voice run locally, and your data stays on your computer. Only the text of the conversation, and a text or page you make a topic from, goes to the LLM provider you choose, with your own API key. Videos are streamed from YouTube; a part of a video's subtitles is sent to estimate its level and to find videos like it, and a sentence you make a pattern from.
 
@@ -44,13 +43,12 @@ Installers for **Apple Silicon Macs** and **64-bit Windows** are attached to eac
    ```bash
    xattr -cr "/Applications/SOS My German.app"
    ```
-3. The first launch downloads Python and the Python packages (~450 MB), so it needs an internet
-   connection and can take a few minutes. Allow microphone access when asked.
-4. The speech models (~830 MB in total) are then downloaded once in the background, with their
+3. The first launch downloads Python and the Python packages (a few hundred MB), so it needs an
+   internet connection and can take a few minutes. Allow microphone access when asked.
+4. The speech models (~600 MB in total) are then downloaded once in the background, with their
    progress shown at the top of the page. You can use the app meanwhile.
 
 Nothing else has to be installed, because the app ships its own [uv](https://docs.astral.sh/uv/).
-Use version 0.1.1 or later: 0.1.0 does not start.
 
 ### Windows
 1. Download `SOS-My-German-Setup-<version>.exe` and run it. It installs for your user account
@@ -61,9 +59,9 @@ Use version 0.1.1 or later: 0.1.0 does not start.
    on macOS. Allow microphone access for desktop apps in Windows' privacy settings if the app
    cannot hear you.
 
-The Windows app has been tried far less than the macOS one: once, in a Windows 11 virtual
-machine (installing, the first launch, and speaking), beside the automated checks. Please open
-an issue if something does not work.
+The Windows app is built the same way as SOS My English's, which was tried once in a Windows 11
+virtual machine, but this one has not been tried on Windows yet beyond the automated checks.
+Please open an issue if something does not work.
 
 On Intel Macs and Linux there is no installer yet; [run it from source](#run-from-source).
 
@@ -95,8 +93,6 @@ settings kept. You can also choose **SOS My German → Check for Updates…**.
 ## First setup
 The app opens on the Settings page the first time.
 
-![The home page of SOS My German, with the list of topics](docs/images/home.png)
-
 1. **Feedback language**: pick the language your corrections are explained in. It starts from
    your system language.
 2. **AI model and API key**: choose a provider and model and paste that provider's API key. It is
@@ -125,7 +121,7 @@ link or the text itself, in any language. A link is opened by the app on your co
 page's readable text is taken from it ([trafilatura](https://github.com/adbar/trafilatura));
 pages that need a login or load their text with JavaScript cannot be read, and links to videos
 are refused, so paste the text or the transcript instead. The LLM writes a title, your
-partner's first line, and a summary of at most eight sentences in plain English. Only that
+partner's first line, and a summary of at most eight sentences in plain German. Only that
 summary is kept: your partner knows it during the conversation, and you can open it on the
 practice page. The text itself is not stored, and at most 30,000 characters of it are used.
 
@@ -139,19 +135,20 @@ wrapped up can be summarized later from the History page. Saying more after a su
 so it can be written again for the whole conversation.
 
 ### Sentence patterns
-The Patterns page lists 100 sentence patterns by CEFR level (A1 to C2), such as "I'd like …",
-"should have + past participle", or "Never have I …". There is no official level for a pattern;
-each is placed where the grammar it needs is usually taught. Picking one starts a round: the LLM
+The Patterns page lists 100 sentence patterns by CEFR level (A1 to C2), such as "Ich möchte …",
+"hätte + infinitive + sollen", or "Kaum hatte … als …". There is no official level for a pattern;
+each is placed where the grammar it needs is usually taught (Profile deutsch and the
+Goethe-Zertifikat syllabuses were the reference). Formulas name their slots in English. Picking one starts a round: the LLM
 writes five new sentences that need the pattern, in your feedback language, each with a model
-answer in English. You say each sentence in English; the recording is transcribed locally and
+answer in German. You say each sentence in German; the recording is transcribed locally and
 the LLM judges it by its meaning, its grammar, and whether the pattern was used, not by whether
 it matches the model answer. You can try again, hear the right sentence, or ask for the answer.
 A round's score counts the sentences that were right at the first try and is kept with the
-pattern; the sentences themselves are not stored. With English as the feedback language, a
-short instruction ("Say that you regret …") is shown in place of a sentence to translate.
+pattern; the sentences themselves are not stored. With German as the feedback language, a
+short instruction in German ("Sag, dass du bereust, …") is shown in place of a sentence to translate.
 
 ### Videos
-The Videos page takes a link to a YouTube video that has English subtitles. The video is played
+The Videos page takes a link to a YouTube video that has German subtitles. The video is played
 by YouTube's own embedded player, inside the app, and is never downloaded. The app reads the
 video's subtitles (preferring ones written by a person to automatic ones) and its title, and
 saves them in the local database, cut into sentences: a subtitle line breaks where it fits the
@@ -168,16 +165,16 @@ Without a configured model a video is saved without a level.
 **Shadowing.** "Say it after" stops the video and records you saying the sentence you just
 heard. The recording is transcribed locally and compared with the sentence word by word (no
 LLM): the page shows the share of words that came through and marks the ones that did not.
-Punctuation and capitals are ignored, "I've" equals "I have", and "three" equals "3". Each
-sentence keeps its best score.
+Punctuation and capitals are ignored, "geht's" equals "geht es", "ß" equals "ss", and "drei"
+equals "3". Each sentence keeps its best score.
 
 **Search.** The search box on the Videos page looks for a word or phrase in the subtitles of
-all saved videos; a result opens its video at that sentence, so you can hear how the phrase is
+all saved videos, with capitals ignored (umlauts too); a result opens its video at that sentence, so you can hear how the phrase is
 used elsewhere.
 
 **Your own patterns.** "Make a pattern" shows the chosen sentence word by word; click the
 first and the last word of the expression you want. The LLM turns it into a formula such as
-"the closest I've ever gotten to + noun/-ing" with a note on its use, and it is saved under
+"noch nie so + adjective + an + dative" with a note on its use, and it is saved under
 "Yours" on the Patterns page with the sentence as its example. It is practised like any other
 pattern, links back to its place in the video, and stays when the video is deleted. Only the
 sentence and the marked part are sent to the LLM.
@@ -185,7 +182,7 @@ sentence and the marked part are sent to the LLM.
 **Similar videos.** "Find similar videos" on a video's page has the LLM think of two or three
 YouTube searches from the video's title and a part of its subtitles. YouTube is searched with
 [yt-dlp](https://github.com/yt-dlp/yt-dlp), and the first few videos found (Shorts and videos
-over an hour left out) are checked: their English subtitles are read and their level estimated,
+over an hour left out) are checked: their German subtitles are read and their level estimated,
 as when a video is added. Only those one level apart at most from the video's own are
 suggested, nearest first; "Add" saves one and opens it. Nothing is saved until you add it. A
 search asks the LLM up to seven times and takes about ten seconds.
@@ -200,8 +197,8 @@ search asks the LLM up to seven times and takes about ten seconds.
 The Corrections page lists the fixes from all saved conversations and the sentences you got
 wrong in pattern practice (with the sentence that was asked for). "Say it" records you, the
 recording is transcribed locally like any other line, and the words are compared with the better
-sentence: punctuation and capitals are ignored, "I'm" equals "I am", and the sentence may be part
-of something longer. A match is counted ("Said right ×2"); otherwise the page shows what was heard
+sentence: punctuation and capitals are ignored, "geht's" equals "geht es", "ß" equals "ss", and
+the sentence may be part of something longer. A match is counted ("Said right ×2"); otherwise the page shows what was heard
 and which words were missing. Speech recognition mishears too, so a try can be counted by hand.
 No LLM is used for this. A correction can be removed from the list; one from a conversation
 stays in that conversation. Deleting a conversation removes its corrections. In pattern
@@ -210,18 +207,21 @@ only shown, not tried, is not kept.
 
 ### Speech-to-text
 What you say is transcribed locally with [Whisper](https://github.com/SYSTRAN/faster-whisper): no
-API key is needed and the audio never leaves your machine. The `small.en` model (~480 MB) is
-downloaded into the data folder (`whisper/`) in the background when the app is first opened, with
+API key is needed and the audio never leaves your machine. The multilingual `small` model
+(~480 MB), told that the speech is German, is downloaded into the data folder (`whisper/`) in the background when the app is first opened, with
 its progress shown at the top of the page; a recording made before it is there waits for it. Set
-the `WHISPER_MODEL` environment variable to use another one. Because it is spoken, punctuation and capitals are
+the `WHISPER_MODEL` environment variable to use another one (not one of the `.en` models,
+which know English only). Because it is spoken, punctuation and capitals are
 never corrected. The clarity score is Whisper's confidence in the words it heard, a proxy for how
 clearly they were pronounced. Allow microphone access when asked.
 
 ### Text-to-speech
-Your partner's lines are read aloud with a local
-[Kokoro](https://github.com/thewh1teagle/kokoro-onnx) voice. Its model files (~350 MB) are
-downloaded in the background when the app is first opened, and rendered clips are cached in
-`backend/data/tts/cache/`. Set the `TTS_VOICE` environment variable to change the voice. While
+Your partner's lines are read aloud with a local [Piper](https://github.com/OHF-Voice/piper1-gpl)
+voice, `de_DE-thorsten-high` from [Piper's voices](https://huggingface.co/rhasspy/piper-voices).
+Its files (~114 MB) are downloaded in the background when the app is first opened, and rendered
+clips are cached in `backend/data/tts/cache/`. Set the `TTS_VOICE` environment variable to the
+name of another Piper voice (for example `de_DE-kerstin-low`) to change it. Kokoro, the voice of
+SOS My English, has no German voice. While
 the download is running, or if the backend cannot produce audio, the browser's built-in voice is
 used instead.
 
@@ -271,8 +271,8 @@ cd frontend && npm test         # unit tests (Vitest)
 cd desktop && npm test          # unit tests (Vitest)
 ```
 
-The backend tests never call a real LLM, Whisper, or Kokoro, and never reach the network. The
-exception is nine "live" tests that send real requests to a model and check the shape of its
+The backend tests never call a real LLM, Whisper, or Piper, and never reach the network. The
+exception is ten "live" tests that send real requests to a model and check the shape of its
 replies; they run only when asked for, with a key in `backend/.env`:
 
 ```bash
@@ -292,7 +292,8 @@ Built with FastAPI and SQLite (backend), Vue 3, TypeScript, Vite, Pinia, and Tai
 (frontend), and Electron (desktop).
 
 ## License
-[MIT](LICENSE). Third-party work shipped in the built app — the libraries and the heading font, Bricolage
+[MIT](LICENSE). Piper (GPL-3.0) and the voice are not part of this repository or the installer:
+they are downloaded on the first launch, like the other Python packages. Third-party work shipped in the built app — the libraries and the heading font, Bricolage
 Grotesque (SIL Open Font License 1.1) — is credited in
 [frontend/public/THIRD_PARTY_NOTICES.txt](frontend/public/THIRD_PARTY_NOTICES.txt), which is also served by the app at
 `/THIRD_PARTY_NOTICES.txt`.

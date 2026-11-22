@@ -1,5 +1,5 @@
 """Videos like a saved one, suggested to study with next: the model thinks of searches, YouTube
-is searched with yt-dlp, and only the videos found with English subtitles at a level near the
+is searched with yt-dlp, and only the videos found with German subtitles at a level near the
 saved one's are suggested."""
 
 from concurrent.futures import ThreadPoolExecutor
@@ -52,11 +52,11 @@ class Searches(BaseModel):
 
 
 SEARCH_PROMPT = """\
-You help an English learner find YouTube videos to study with. You get the title and the
+You help a German learner find YouTube videos to study with. You get the title and the
 channel of a video they are studying, and sentences from it. Think of two or three YouTube
 searches that find other videos like it: on the same subject or in the same kind of format
-(a talk, an interview, a vlog, a lesson), spoken in English at a similar difficulty. Each
-search is a few words, as a person would type it.
+(a talk, an interview, a vlog, a lesson), spoken in German at a similar difficulty. Each
+search is a few words, as a person would type it, in German.
 
 Reply with a single JSON object matching this schema, and nothing else:
 {schema}"""
@@ -98,7 +98,7 @@ def _queries(video: videos.Video) -> list[str]:
 
 
 def _check(found: Found) -> Suggestion | None:
-    """The video as a suggestion, with its level; None when it has no English subtitles that
+    """The video as a suggestion, with its level; None when it has no German subtitles that
     can be read, or no level can be estimated for it."""
     try:
         snippets, _, generated = videos._transcript(found.video_id)

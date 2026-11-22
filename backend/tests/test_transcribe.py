@@ -7,17 +7,23 @@ from app.paths import DATA_DIR
 
 
 class FakeWhisperModel:
-    """Stands in for the Whisper model and records how it was loaded."""
+    """Stands in for the Whisper model and records how it was loaded and asked."""
 
     loads: list[dict] = []
+    asked: list[dict] = []
 
     def __init__(self, name, **options):
         FakeWhisperModel.loads.append({"name": name, **options})
+
+    def transcribe(self, audio, **options):
+        FakeWhisperModel.asked.append(options)
+        return [], None
 
 
 @pytest.fixture(autouse=True)
 def fake_model(monkeypatch):
     FakeWhisperModel.loads = []
+    FakeWhisperModel.asked = []
     monkeypatch.setattr(transcribe, "WhisperModel", FakeWhisperModel)
     monkeypatch.setattr(transcribe, "_model", None)
     # The model files are already "downloaded".
@@ -31,15 +37,21 @@ def test_model_is_kept_in_the_app_data_folder():
     assert FakeWhisperModel.loads[0]["download_root"] == str(DATA_DIR / "whisper")
 
 
-def test_default_model_is_the_small_english_one():
+def test_default_model_is_the_small_multilingual_one():
+    # Whisper's ".en" models know English only.
     transcribe._get_model()
-    assert FakeWhisperModel.loads[0]["name"] == "small.en"
+    assert FakeWhisperModel.loads[0]["name"] == "small"
+
+
+def test_speech_is_recognized_as_german():
+    transcribe.transcribe(b"audio")
+    assert FakeWhisperModel.asked[0]["language"] == "de"
 
 
 def test_another_model_can_be_chosen_with_the_environment(monkeypatch):
-    monkeypatch.setenv("WHISPER_MODEL", " medium.en ")
+    monkeypatch.setenv("WHISPER_MODEL", " medium ")
     transcribe._get_model()
-    assert FakeWhisperModel.loads[0]["name"] == "medium.en"
+    assert FakeWhisperModel.loads[0]["name"] == "medium"
 
 
 def test_model_is_loaded_once():

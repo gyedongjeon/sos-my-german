@@ -29,13 +29,13 @@ router = APIRouter(prefix="/api")
 VIDEO_ID = re.compile(r"[A-Za-z0-9_-]{11}")
 # Path prefixes under which youtube.com names a video: /embed/<id>, /shorts/<id>, /live/<id>.
 PATH_KINDS = {"embed", "shorts", "live", "v"}
-ENGLISH = ["en", "en-US", "en-GB", "en-CA", "en-AU", "en-IN"]
+GERMAN = ["de", "de-DE", "de-AT", "de-CH"]
 
-# What subtitles carry besides speech: [Music], (Laughter), speaker arrows, music notes.
-NOISE = re.compile(r"\[[^\]]*\]|\([A-Z][a-z]+(?: [a-z]+)?\)|>>|♪|♫")
+# What subtitles carry besides speech: [Musik], (Gelächter), speaker arrows, music notes.
+NOISE = re.compile(r"\[[^\]]*\]|\([A-ZÄÖÜ][a-zäöüß]+(?: [a-zäöüß]+)?\)|>>|♪|♫")
 SENTENCE_END = re.compile(r"[.!?][\"'”’)\]]*$")
 # A full stop after one of these does not end a sentence.
-ABBREVIATIONS = {"mr.", "mrs.", "ms.", "dr.", "st.", "vs.", "e.g.", "i.e.", "etc."}
+ABBREVIATIONS = {"dr.", "hr.", "fr.", "prof.", "nr.", "ca.", "bzw.", "usw.", "etc.", "evtl.", "ggf.", "vgl.", "z.b.", "d.h.", "u.a."}
 # Subtitles with fewer sentence ends than one in this many words were written without
 # punctuation (typical of automatic ones), so they cannot be cut into sentences.
 WORDS_PER_END = 40
@@ -46,7 +46,7 @@ LONG, TOO_LONG = 40, 60
 
 
 class NoSubtitles(Exception):
-    """Raised with a user-facing message when a video's English subtitles cannot be had."""
+    """Raised with a user-facing message when a video's German subtitles cannot be had."""
 
 
 @dataclass(frozen=True)
@@ -119,7 +119,7 @@ class VideoSummary(BaseModel):
     generated: bool
     added_at: str
     sentences: int
-    # The CEFR level of its English, A1 to C2; None while it has none.
+    # The CEFR level of its German, A1 to C2; None while it has none.
     level: str | None = None
 
 
@@ -148,12 +148,12 @@ class Estimate(BaseModel):
 
 
 LEVEL_PROMPT = """\
-You are an English teacher choosing videos for learners. You get sentences taken from the
+You are a German teacher choosing videos for learners. You get sentences taken from the
 start, the middle, and the end of a video's subtitles, and how fast it is spoken. Estimate the
 CEFR level a learner needs to follow the video by ear and to repeat its sentences: A1, A2, B1,
 B2, C1 or C2. Go by the vocabulary, the length and build of the sentences, how much is idiom or
 specialist language, and the speed: around 120 words a minute is slow and clear, 150 is
-ordinary speech, and 180 or more is fast.
+ordinary speech, and 180 or more is fast. Dialect or strongly regional speech makes a video harder.
 
 Reply with a single JSON object matching this schema, and nothing else:
 {schema}"""
@@ -278,13 +278,13 @@ def _line_ends(kept: list[tuple[Snippet, str]]) -> list[float]:
 
 
 def _transcript(video_id: str) -> tuple[list[Snippet], str, bool]:
-    """The English subtitles of a video: the lines, their language code, and whether they were
+    """The German subtitles of a video: the lines, their language code, and whether they were
     made automatically. Subtitles written by a person are preferred."""
     try:
-        track = YouTubeTranscriptApi().list(video_id).find_transcript(ENGLISH)
+        track = YouTubeTranscriptApi().list(video_id).find_transcript(GERMAN)
         fetched = track.fetch()
     except (NoTranscriptFound, TranscriptsDisabled) as e:
-        raise NoSubtitles("This video has no English subtitles.") from e
+        raise NoSubtitles("This video has no German subtitles.") from e
     except VideoUnavailable as e:
         raise NoSubtitles("This video does not exist or is not available.") from e
     except YouTubeTranscriptApiException as e:
@@ -334,7 +334,7 @@ def list_videos() -> list[VideoSummary]:
 
 @router.post("/videos", response_model=Video, status_code=201)
 def add_video(body: NewVideo, response: Response) -> Video:
-    """Save a YouTube video to study with: its title and its English subtitles, as sentences.
+    """Save a YouTube video to study with: its title and its German subtitles, as sentences.
     The video itself is not downloaded; it is played by YouTube's player."""
     video_id = video_id_of(body.url)
     if video_id is None:
@@ -349,7 +349,7 @@ def add_video(body: NewVideo, response: Response) -> Video:
         raise HTTPException(status_code=422, detail=str(e)) from e
     lines = sentences(snippets)
     if not lines:
-        raise HTTPException(status_code=422, detail="This video has no English subtitles.")
+        raise HTTPException(status_code=422, detail="This video has no German subtitles.")
     title, channel = _about(video_id)
     try:
         level = _estimate(lines)
@@ -425,13 +425,15 @@ def search_lines(q: str = Query(min_length=1, max_length=200)) -> list[Hit]:
     if not phrase:
         raise HTTPException(status_code=422, detail="Type a word or a phrase to look for.")
     # The phrase is looked for as it is: "%" and "_" are not wildcards here.
-    escaped = phrase.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    escaped = phrase.casefold().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
     with get_connection() as conn:
+        # SQLite ignores the case of ASCII letters only; "Ä" and "ä" are told apart.
+        conn.create_function("casefold", 1, lambda text: text.casefold(), deterministic=True)
         rows = conn.execute(
             """
             SELECT l.id, l.video, v.video_id, v.title, l.position, l.start, l.text
             FROM video_lines l JOIN videos v ON v.id = l.video
-            WHERE l.text LIKE ? ESCAPE '\\'
+            WHERE casefold(l.text) LIKE ? ESCAPE '\\'
             ORDER BY v.id DESC, l.position LIMIT ?
             """,
             (f"%{escaped}%", MAX_HITS),

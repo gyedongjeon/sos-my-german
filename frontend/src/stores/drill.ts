@@ -14,7 +14,7 @@ export interface DrillTry {
 
 type DrillPhase = 'loading' | 'idle' | 'transcribing' | 'checking' | 'done'
 
-/** One round of a sentence pattern: a few sentences shown in the learner's language, said in English. */
+/** One round of a sentence pattern: a few sentences shown in the learner's language, said in German. */
 export const useDrillStore = defineStore('drill', {
   state: () => ({
     pattern: null as PatternStatus | null,

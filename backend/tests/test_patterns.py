@@ -1,4 +1,4 @@
-"""Sentence patterns, grouped by CEFR level, practised by saying a sentence in English."""
+"""Sentence patterns, grouped by CEFR level, practised by saying a sentence in German."""
 
 import json
 from collections import Counter
@@ -12,12 +12,12 @@ from app.patterns import LEVELS, PATTERNS
 EXERCISES = {
     "note": "과거의 일을 후회할 때 씁니다.",
     "items": [
-        {"prompt": "더 일찍 떠났어야 했어.", "answer": "I should have left earlier."},
-        {"prompt": "그에게 말했어야 했어.", "answer": "I should have told him."},
+        {"prompt": "더 일찍 떠났어야 했어.", "answer": "Ich hätte früher gehen sollen."},
+        {"prompt": "그에게 말했어야 했어.", "answer": "Ich hätte es ihm sagen sollen."},
     ],
 }
-VERDICT = {"correct": False, "improved": "I should have left earlier.", "explanation": "have 뒤에는 과거분사를 씁니다."}
-ATTEMPT = {"prompt": "더 일찍 떠났어야 했어.", "answer": "I should have left earlier.", "said": "I should have leave earlier."}
+VERDICT = {"correct": False, "improved": "Ich hätte früher gehen sollen.", "explanation": "sollen은 원형 그대로 씁니다."}
+ATTEMPT = {"prompt": "더 일찍 떠났어야 했어.", "answer": "Ich hätte früher gehen sollen.", "said": "Ich hätte früher gehen gesollt."}
 
 
 @pytest.fixture
@@ -60,11 +60,11 @@ def test_patterns_are_listed_level_by_level_and_start_unpractised(client):
 
 def test_exercises_are_written_for_the_pattern_in_the_learners_language(client, model):
     client.put("/api/settings", json={"feedback_language": "Korean"})
-    response = client.post("/api/patterns/should-have/exercises")
+    response = client.post("/api/patterns/haette-sollen/exercises")
     assert response.status_code == 200, response.text
     assert response.json() == EXERCISES
     system, _ = model.calls[0]
-    assert "should have + past participle" in system and "Korean" in system and "B2" in system
+    assert "hätte + infinitive + sollen" in system and "Korean" in system and "B2" in system
 
 
 def test_exercises_that_cannot_be_written_are_reported(client, monkeypatch):
@@ -72,40 +72,40 @@ def test_exercises_that_cannot_be_written_are_reported(client, monkeypatch):
         raise LLMError("The LLM provider is not responding.")
 
     monkeypatch.setattr(patterns, "complete", fail)
-    response = client.post("/api/patterns/should-have/exercises")
+    response = client.post("/api/patterns/haette-sollen/exercises")
     assert response.status_code == 502 and "not responding" in response.json()["detail"]
 
 
 def test_a_reply_without_exercises_is_reported(client, model):
     model.reply = {"note": "…", "items": []}
-    assert client.post("/api/patterns/should-have/exercises").status_code == 502
+    assert client.post("/api/patterns/haette-sollen/exercises").status_code == 502
 
 
 def test_what_was_said_is_judged_by_the_model(client, model):
     model.reply = VERDICT
-    response = client.post("/api/patterns/should-have/check", json=ATTEMPT)
+    response = client.post("/api/patterns/haette-sollen/check", json=ATTEMPT)
     assert response.status_code == 200, response.text
     assert response.json() == VERDICT
     system, user = model.calls[0]
-    assert "should have + past participle" in system
+    assert "hätte + infinitive + sollen" in system
     assert all(text in user for text in ATTEMPT.values())
 
 
 def test_the_model_answer_said_as_it_is_needs_no_model(client):
     # The LLM is not mocked here: reaching it would fail the test. Spoken, so punctuation,
     # capitals, and short forms do not matter.
-    said = {**ATTEMPT, "answer": "I should have left earlier.", "said": "i should've left earlier"}
-    assert client.post("/api/patterns/should-have/check", json=said).json() == {
+    said = {**ATTEMPT, "answer": "Ich hätte früher gehen sollen.", "said": "ich hätte früher gehen sollen"}
+    assert client.post("/api/patterns/haette-sollen/check", json=said).json() == {
         "correct": True,
-        "improved": "I should have left earlier.",
+        "improved": "Ich hätte früher gehen sollen.",
         "explanation": None,
     }
 
 
 def test_a_correct_sentence_needs_no_explanation(client, model):
-    model.reply = {"correct": True, "improved": "I should have gone sooner.", "explanation": "Great!"}
-    said = {**ATTEMPT, "said": "I should have gone sooner."}
-    assert client.post("/api/patterns/should-have/check", json=said).json()["explanation"] is None
+    model.reply = {"correct": True, "improved": "Ich hätte eher losgehen sollen.", "explanation": "Great!"}
+    said = {**ATTEMPT, "said": "Ich hätte eher losgehen sollen."}
+    assert client.post("/api/patterns/haette-sollen/check", json=said).json()["explanation"] is None
 
 
 def test_a_judgement_that_fails_is_reported(client, monkeypatch):
@@ -113,23 +113,23 @@ def test_a_judgement_that_fails_is_reported(client, monkeypatch):
         raise LLMError("The LLM provider is not responding.")
 
     monkeypatch.setattr(patterns, "complete", fail)
-    assert client.post("/api/patterns/should-have/check", json=ATTEMPT).status_code == 502
-    assert client.post("/api/patterns/should-have/check", json={**ATTEMPT, "said": ""}).status_code == 422
+    assert client.post("/api/patterns/haette-sollen/check", json=ATTEMPT).status_code == 502
+    assert client.post("/api/patterns/haette-sollen/check", json={**ATTEMPT, "said": ""}).status_code == 422
 
 
 def test_a_finished_round_is_recorded_with_the_pattern(client):
-    assert client.post("/api/patterns/should-have/results", json={"correct": 3, "total": 5}).status_code == 200
-    saved = client.post("/api/patterns/should-have/results", json={"correct": 5, "total": 5}).json()
+    assert client.post("/api/patterns/haette-sollen/results", json={"correct": 3, "total": 5}).status_code == 200
+    saved = client.post("/api/patterns/haette-sollen/results", json={"correct": 5, "total": 5}).json()
     assert (saved["sessions"], saved["last_correct"], saved["last_total"]) == (2, 5, 5)
     assert saved["practiced_at"].endswith("Z")
     listed = {p["id"]: p for p in client.get("/api/patterns").json()}
-    assert listed["should-have"] == saved
-    assert listed["id-like"]["sessions"] == 0
+    assert listed["haette-sollen"] == saved
+    assert listed["moechte"]["sessions"] == 0
 
 
 def test_a_result_must_make_sense(client):
     for body in ({"correct": 6, "total": 5}, {"correct": -1, "total": 5}, {"correct": 0, "total": 0}):
-        assert client.post("/api/patterns/should-have/results", json=body).status_code == 422
+        assert client.post("/api/patterns/haette-sollen/results", json=body).status_code == 422
 
 
 def test_an_unknown_pattern_is_not_found(client):

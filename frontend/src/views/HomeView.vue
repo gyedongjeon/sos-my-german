@@ -55,7 +55,7 @@ onMounted(() => store.load())
         <span class="text-primary">Help is on the way.</span>
       </h1>
       <p class="mt-3 text-base-content/70">
-        Pick a topic and talk it through out loud. Your partner answers by voice and fixes your English as you go.
+        Pick a topic and talk it through out loud. Your partner answers by voice and fixes your German as you go.
       </p>
     </header>
 
@@ -164,7 +164,7 @@ onMounted(() => store.load())
               required
               placeholder="Who your partner is and what you talk about. For example: my partner works at a car rental desk at the airport, and I pick up the car I booked."
             ></textarea>
-            <span class="text-xs text-base-content/60">Any language works; the conversation itself is in English.</span>
+            <span class="text-xs text-base-content/60">Any language works; the conversation itself is in German.</span>
           </label>
           <label class="flex flex-col gap-1">
             <span class="text-sm font-medium">Your partner's first line <span class="font-normal text-base-content/60">(optional)</span></span>

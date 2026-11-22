@@ -11,57 +11,56 @@ DB_PATH = DATA_DIR / "app.db"
 # The categories the built-in topics are shown under, in this order.
 CATEGORIES = ["Everyday", "Work", "School", "Shopping", "Food", "Travel", "Services", "Home", "Opinions"]
 
-# Built-in topics: (title, the situation the tutor plays out, the tutor's opening line, category).
-# New topics go at the end: a topic's place here decides its id in a new database, and the ids of
-# the first six are the ones databases of earlier versions already have.
+# Built-in topics: (title, the situation the tutor plays out, the tutor's opening line in German,
+# category). New topics go at the end: a topic's place here decides its id in a new database.
 SEED_TOPICS = [
     (
         "Small talk",
         "A relaxed chat between two acquaintances about everyday life.",
-        "Hi! It's good to see you. How has your week been so far?",
+        "Hallo! Schön, dich zu sehen. Wie war deine Woche bisher?",
         "Everyday",
     ),
     (
         "Introducing yourself",
         "Two people meet for the first time at a social event and get to know each other.",
-        "Hi, I don't think we've met. I'm Alex. What's your name, and what do you do?",
+        "Hallo, ich glaube, wir kennen uns noch nicht. Ich bin Alex. Wie heißt du, und was machst du so?",
         "Everyday",
     ),
     (
         "At a café",
         "The tutor is a barista taking the learner's order at a café.",
-        "Good morning! Welcome in. What can I get started for you today?",
+        "Guten Morgen! Herzlich willkommen. Was darf es für Sie sein?",
         "Food",
     ),
     (
         "Travel plans",
         "Two friends talk about a trip the learner is planning or has taken.",
-        "I heard you've been thinking about a trip. Where would you like to go?",
+        "Ich habe gehört, du planst eine Reise. Wohin möchtest du denn fahren?",
         "Travel",
     ),
     (
         "Weekend and hobbies",
         "A friendly chat about what the learner does in their free time.",
-        "So, what do you usually like to do on the weekend?",
+        "Und, was machst du am Wochenende normalerweise gern?",
         "Everyday",
     ),
     (
         "A meeting at work",
         "The tutor is a colleague catching up with the learner on a project before a meeting.",
-        "Thanks for joining. Before we start, could you tell me what you've been working on this week?",
+        "Danke, dass du dabei bist. Bevor wir anfangen: Woran hast du diese Woche gearbeitet?",
         "Work",
     ),
     # Everyday
     (
         "Talking about the weather",
         "Two neighbours run into each other outside and chat about the weather and their day.",
-        "Morning! Can you believe this weather? How is it treating you today?",
+        "Morgen! Was für ein Wetter heute, oder? Wie geht es Ihnen?",
         "Everyday",
     ),
     (
         "Making plans with a friend",
         "The tutor is a friend of the learner, and the two decide what to do together this weekend.",
-        "Hey! Are you free this weekend? I was thinking we could do something together.",
+        "Hey! Hast du am Wochenende Zeit? Ich dachte, wir könnten zusammen etwas unternehmen.",
         "Everyday",
     ),
     # Work
@@ -69,25 +68,25 @@ SEED_TOPICS = [
         "Daily stand-up",
         "The tutor leads a team's short daily meeting, where each person says what they did, "
         "what they will do next, and what is in their way.",
-        "Good morning, everyone. Let's start with you. What did you get done yesterday?",
+        "Guten Morgen zusammen. Fangen wir mit dir an. Was hast du gestern geschafft?",
         "Work",
     ),
     (
         "Asking a colleague for help",
         "The tutor is a colleague at the next desk; the learner is stuck on a task and needs their help.",
-        "Hey, you look a bit stuck over there. Is everything okay?",
+        "Hey, du siehst ein bisschen ratlos aus. Ist alles in Ordnung?",
         "Work",
     ),
     (
         "A status update for your manager",
         "The tutor is the learner's manager in a one-on-one meeting about how a project is going.",
-        "Thanks for making time. So, how is the project going? Are we still on schedule?",
+        "Danke, dass du dir Zeit nimmst. Wie läuft das Projekt? Liegen wir noch im Zeitplan?",
         "Work",
     ),
     (
         "A call with a client",
         "The tutor is a client on a phone call with the learner about what they need and by when.",
-        "Hi, thanks for calling. I wanted to go over what we need from your team. Is now a good time?",
+        "Hallo, danke für Ihren Anruf. Ich wollte mit Ihnen besprechen, was wir von Ihrem Team brauchen. Passt es gerade?",
         "Work",
     ),
     # School
@@ -95,26 +94,26 @@ SEED_TOPICS = [
         "Asking a professor a question",
         "The tutor is a professor in their office hours; the learner is a student with a question "
         "about the course.",
-        "Come in, have a seat. What can I help you with today?",
+        "Kommen Sie herein, nehmen Sie Platz. Wobei kann ich Ihnen helfen?",
         "School",
     ),
     (
         "A group project",
         "The tutor is a classmate; the two plan a group project and decide who does what.",
-        "Okay, the project is due in two weeks. How do you think we should split up the work?",
+        "Also, das Projekt ist in zwei Wochen fällig. Wie sollen wir die Arbeit aufteilen?",
         "School",
     ),
     (
         "Introducing yourself in class",
         "The tutor is a teacher on the first day of a class, getting to know a new student.",
-        "Welcome to the class! Could you tell us a little about yourself?",
+        "Willkommen im Kurs! Kannst du uns ein bisschen von dir erzählen?",
         "School",
     ),
     (
         "Chatting with a classmate",
         "The tutor is a classmate chatting with the learner after class about the lecture and "
         "their plans.",
-        "That lecture was a lot to take in! What did you think of it?",
+        "Die Vorlesung war ganz schön viel auf einmal! Wie fandest du sie?",
         "School",
     ),
     # Shopping
@@ -122,47 +121,47 @@ SEED_TOPICS = [
         "At a market",
         "The tutor sells fruit and vegetables at an outdoor market; the learner wants to buy "
         "some and asks about prices.",
-        "Hello there! Everything is fresh this morning. What are you looking for?",
+        "Hallo! Alles ganz frisch heute Morgen. Was darf es sein?",
         "Shopping",
     ),
     (
         "Buying clothes",
         "The tutor is a shop assistant in a clothing store, helping the learner find the right "
         "item and size.",
-        "Hi, welcome in! Are you looking for anything in particular today?",
+        "Hallo, herzlich willkommen! Suchen Sie etwas Bestimmtes?",
         "Shopping",
     ),
     (
         "Returning an item",
         "The tutor works at a store's customer service desk; the learner wants to return or "
         "exchange something they bought.",
-        "Hi, how can I help you today?",
+        "Hallo, wie kann ich Ihnen helfen?",
         "Shopping",
     ),
     (
         "At the supermarket checkout",
         "The tutor is a cashier at a supermarket, ringing up the learner's groceries.",
-        "Hi there! Did you find everything you were looking for today?",
+        "Hallo! Haben Sie alles gefunden, was Sie gesucht haben?",
         "Shopping",
     ),
     # Food
     (
         "Ordering at a restaurant",
         "The tutor is a server at a restaurant, taking the learner's order for a meal.",
-        "Good evening, and welcome. Can I get you something to drink while you look at the menu?",
+        "Guten Abend und herzlich willkommen. Darf ich Ihnen schon etwas zu trinken bringen, während Sie in die Karte schauen?",
         "Food",
     ),
     (
         "Booking a table by phone",
         "The tutor answers the phone at a restaurant; the learner calls to book a table.",
-        "Thank you for calling. How can I help you?",
+        "Vielen Dank für Ihren Anruf. Was kann ich für Sie tun?",
         "Food",
     ),
     (
         "A problem with your order",
         "The tutor is a server at a restaurant; something is wrong with what the learner was "
         "served, and the learner says so politely.",
-        "Hi, how is everything tasting so far?",
+        "Hallo, schmeckt es Ihnen bisher?",
         "Food",
     ),
     # Travel
@@ -170,27 +169,27 @@ SEED_TOPICS = [
         "Airport check-in",
         "The tutor works at an airline's check-in desk; the learner is checking in for a flight "
         "with a bag.",
-        "Good morning! Where are you flying to today? May I see your passport, please?",
+        "Guten Morgen! Wohin fliegen Sie heute? Darf ich bitte Ihren Reisepass sehen?",
         "Travel",
     ),
     (
         "Hotel check-in",
         "The tutor is a hotel receptionist; the learner arrives with a reservation and has a few "
         "questions about the stay.",
-        "Good afternoon, and welcome! Do you have a reservation with us?",
+        "Guten Tag und herzlich willkommen! Haben Sie bei uns reserviert?",
         "Travel",
     ),
     (
         "Asking for directions",
         "The learner is a visitor who is lost in a city; the tutor is a local on the street who "
         "knows the way.",
-        "Hi there! You look a little lost. Can I help you find something?",
+        "Hallo! Sie sehen ein bisschen verloren aus. Kann ich Ihnen helfen?",
         "Travel",
     ),
     (
         "At immigration",
         "The tutor is an immigration officer at an airport, asking the learner about their visit.",
-        "Next, please. Good afternoon. What is the purpose of your visit?",
+        "Der Nächste, bitte. Guten Tag. Was ist der Zweck Ihrer Reise?",
         "Travel",
     ),
     # Services
@@ -198,28 +197,28 @@ SEED_TOPICS = [
         "At the doctor's",
         "The tutor is a doctor; the learner is a patient who is not feeling well and describes "
         "their symptoms.",
-        "Hello, please have a seat. So, what brings you in today?",
+        "Guten Tag, setzen Sie sich bitte. Was führt Sie zu mir?",
         "Services",
     ),
     (
         "At a pharmacy",
         "The tutor is a pharmacist; the learner needs something for a minor health problem and "
         "asks how to take it.",
-        "Hi there. What can I help you with today?",
+        "Guten Tag. Was kann ich für Sie tun?",
         "Services",
     ),
     (
         "At the bank",
         "The tutor works at a bank; the learner wants to open an account or has a question about "
         "theirs.",
-        "Good morning! What can I do for you today?",
+        "Guten Morgen! Was kann ich heute für Sie tun?",
         "Services",
     ),
     (
         "Calling customer service",
         "The tutor is a customer service agent on the phone; the learner calls about a problem "
         "with a product or a bill.",
-        "Thank you for calling customer service. How can I help you today?",
+        "Vielen Dank, dass Sie den Kundenservice anrufen. Wie kann ich Ihnen helfen?",
         "Services",
     ),
     # Home
@@ -227,27 +226,27 @@ SEED_TOPICS = [
         "Talking to your landlord",
         "The tutor is the learner's landlord; the learner tells them about something in the "
         "apartment that needs fixing.",
-        "Hi, good to hear from you. Is everything all right with the apartment?",
+        "Hallo, schön, von Ihnen zu hören. Ist mit der Wohnung alles in Ordnung?",
         "Home",
     ),
     (
         "Meeting a new neighbour",
         "The learner has just moved in; the tutor is a neighbour who lives next door and says hello.",
-        "Hi! You must be the new neighbour. I live next door. How is the move going?",
+        "Hallo! Sie sind bestimmt gerade hier eingezogen. Ich wohne nebenan. Wie läuft der Umzug?",
         "Home",
     ),
     (
         "Calling a repair service",
         "The tutor answers the phone at a repair company; the learner calls because something at "
         "home is broken and books a visit.",
-        "Hello, thanks for calling. What seems to be the problem?",
+        "Guten Tag, danke für Ihren Anruf. Was ist denn das Problem?",
         "Home",
     ),
     (
         "Viewing an apartment",
         "The tutor is an agent showing the learner an apartment for rent; the learner asks about "
         "the place, the rent, and the area.",
-        "Hi, thanks for coming! Come on in. This is the living room. What do you think so far?",
+        "Hallo, schön, dass Sie da sind! Kommen Sie rein. Das ist das Wohnzimmer. Wie gefällt es Ihnen bisher?",
         "Home",
     ),
     # Opinions: no role to play; the learner talks at more length about what they think.
@@ -255,35 +254,35 @@ SEED_TOPICS = [
         "A movie or show you watched",
         "A friendly chat in which the learner describes a movie or show they watched and says "
         "what they thought of it. The tutor asks for details and reasons.",
-        "I'm looking for something good to watch. What's the last movie or show you saw?",
+        "Ich suche gerade etwas Gutes zum Anschauen. Welchen Film oder welche Serie hast du zuletzt gesehen?",
         "Opinions",
     ),
     (
         "Your hometown",
         "A friendly chat in which the learner describes the place they come from and what they "
         "like and dislike about it. The tutor asks for details and reasons.",
-        "I'd love to hear about where you're from. What is your hometown like?",
+        "Erzähl mal, wo kommst du eigentlich her? Wie ist es in deiner Heimatstadt?",
         "Opinions",
     ),
     (
         "Working from home or at the office",
         "A friendly discussion of whether it is better to work from home or at the office. The "
         "tutor asks for the learner's opinion and reasons, and sometimes gently takes the other side.",
-        "Some people love working from home, and others can't stand it. What about you?",
+        "Manche lieben das Homeoffice, andere halten es gar nicht aus. Wie ist das bei dir?",
         "Opinions",
     ),
     (
         "Something you read recently",
         "A friendly chat in which the learner sums up a book or an article they read and says "
         "what they thought of it. The tutor asks for details and reasons.",
-        "Have you read anything interesting lately? What was it about?",
+        "Hast du in letzter Zeit etwas Interessantes gelesen? Worum ging es?",
         "Opinions",
     ),
     (
         "Your plans for next year",
         "A friendly chat about what the learner wants to do or change next year and why. The "
         "tutor asks for details and reasons.",
-        "The year is going by so fast! Is there anything you'd like to do or change next year?",
+        "Das Jahr vergeht so schnell! Gibt es etwas, das du nächstes Jahr machen oder ändern möchtest?",
         "Opinions",
     ),
 ]
@@ -415,7 +414,7 @@ def init_db() -> None:
             )
             """
         )
-        # The CEFR level (A1-C2) of a video's English: estimated when it is added, or set by
+        # The CEFR level (A1-C2) of a video's German: estimated when it is added, or set by
         # the learner; empty while neither has happened.
         _add_column(conn, "videos", "level", "TEXT")
         conn.execute(

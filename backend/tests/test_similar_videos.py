@@ -24,7 +24,7 @@ def youtube(monkeypatch):
 
     def transcript(video_id):
         if video_id not in youtube.levels:
-            raise videos.NoSubtitles("This video has no English subtitles.")
+            raise videos.NoSubtitles("This video has no German subtitles.")
         return speech(video_id), "en", False
 
     def estimate(lines):

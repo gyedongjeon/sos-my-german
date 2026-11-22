@@ -43,7 +43,7 @@ export interface Review {
   strengths: string[]
   focus: string[]
   /** Expressions that would have fit the conversation, with what they mean. */
-  phrases: { english: string; note: string }[]
+  phrases: { german: string; note: string }[]
 }
 
 /** A line of a saved conversation, as the backend returns it. */
@@ -90,7 +90,7 @@ export interface SavedCorrection {
   conversation_id: number | null
   pattern_id: string | null
   title: string
-  /** For a pattern mistake: the sentence that was to be said in English. */
+  /** For a pattern mistake: the sentence that was to be said in German. */
   prompt: string | null
   original: string
   improved: string
@@ -120,7 +120,7 @@ export interface PatternStatus {
   position: number | null
 }
 
-/** One sentence of a round: shown in the learner's language, said in English. */
+/** One sentence of a round: shown in the learner's language, said in German. */
 export interface Exercise {
   prompt: string
   answer: string
@@ -175,7 +175,7 @@ export interface VideoSummary {
   generated: boolean
   added_at: string
   sentences: number
-  /** The CEFR level of its English, A1 to C2; null while it has none. */
+  /** The CEFR level of its German, A1 to C2; null while it has none. */
   level: string | null
 }
 

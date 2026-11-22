@@ -34,7 +34,7 @@ onMounted(() => store.load())
   <main class="mx-auto max-w-3xl p-4 sm:p-6">
     <h1 class="text-2xl font-semibold">Videos</h1>
     <p class="text-sm text-base-content/70">
-      Paste a link to a YouTube video with English subtitles, then listen to it one sentence at a time.
+      Paste a link to a YouTube video with German subtitles, then listen to it one sentence at a time.
     </p>
 
     <form class="mt-4 flex flex-wrap gap-2" @submit.prevent="add">

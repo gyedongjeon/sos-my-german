@@ -20,8 +20,8 @@ def youtube(monkeypatch):
     def transcript(video_id):
         transcript.asked.append(video_id)
         if video_id not in transcript.tracks:
-            raise videos.NoSubtitles("This video has no English subtitles.")
-        return transcript.tracks[video_id], "en", False
+            raise videos.NoSubtitles("This video has no German subtitles.")
+        return transcript.tracks[video_id], "de", False
 
     transcript.tracks, transcript.asked = {"UF8uR6Z6KLc": SPEECH}, []
     transcript.titles = {"UF8uR6Z6KLc": ("Commencement address", "Stanford")}
@@ -115,7 +115,7 @@ def test_a_video_is_saved_with_its_title_and_sentences(client, youtube):
     added = add(client)
     assert added["video_id"] == "UF8uR6Z6KLc"
     assert (added["title"], added["channel"]) == ("Commencement address", "Stanford")
-    assert added["language"] == "en" and added["generated"] is False
+    assert added["language"] == "de" and added["generated"] is False
     assert added["added_at"].endswith("Z")
     assert [line["text"] for line in added["lines"]][1] == "Thank you."
     assert all(line["end"] > line["start"] for line in added["lines"])
@@ -148,7 +148,7 @@ def test_a_link_that_is_not_a_youtube_video_is_refused(client, youtube):
 
 def test_a_video_without_subtitles_is_reported_and_not_saved(client, youtube):
     response = client.post("/api/videos", json={"url": "https://youtu.be/dQw4w9WgXcQ"})
-    assert response.status_code == 422 and "no English subtitles" in response.json()["detail"]
+    assert response.status_code == 422 and "no German subtitles" in response.json()["detail"]
     youtube.tracks["dQw4w9WgXcQ"] = [Snippet(0.0, 2.0, "[Music]")]
     assert client.post("/api/videos", json={"url": "https://youtu.be/dQw4w9WgXcQ"}).status_code == 422
     assert client.get("/api/videos").json() == []
@@ -175,3 +175,13 @@ def test_a_long_silence_ends_a_sentence_that_has_no_full_stop():
     lines = sentences(intro)
     assert [line.text for line in lines] == ["Please visit us at stanford.edu", "Thank you.", "I am honored."]
     assert lines[0].end == 14.0 and lines[1].start == 22.0
+
+
+def test_a_german_abbreviation_does_not_end_a_sentence():
+    said = [Snippet(0.0, 6.0, "Wir essen z.B. Brot und Käse. Dr. Weber kommt um ca. acht. Danke.")]
+    assert [line.text for line in sentences(said)] == ["Wir essen z.B. Brot und Käse.", "Dr. Weber kommt um ca. acht.", "Danke."]
+
+
+def test_german_stage_directions_are_left_out():
+    talk = [Snippet(0.0, 4.0, "Und dann (Gelächter) ging es los."), Snippet(4.0, 2.0, "(Beifall) Vielen Dank.")]
+    assert [line.text for line in sentences(talk)] == ["Und dann ging es los.", "Vielen Dank."]

@@ -8,7 +8,7 @@ const SAVED: VideoSummary = {
   video_id: 'UF8uR6Z6KLc',
   title: 'Commencement address',
   channel: 'Stanford',
-  language: 'en',
+  language: 'de',
   generated: false,
   added_at: '2026-11-21T10:00:00Z',
   sentences: 150,
@@ -19,7 +19,7 @@ const ADDED: Video = {
   video_id: 'arj7oStGLkU',
   title: 'A talk',
   channel: 'TED',
-  language: 'en',
+  language: 'de',
   generated: true,
   added_at: '2026-11-21T11:00:00Z',
   level: null,
@@ -85,11 +85,11 @@ describe('videos', () => {
   })
 
   it('says why a video could not be added', async () => {
-    fakeBackend({ 'GET /videos': [200, []], 'POST /videos': [422, { detail: 'This video has no English subtitles.' }] })
+    fakeBackend({ 'GET /videos': [200, []], 'POST /videos': [422, { detail: 'This video has no German subtitles.' }] })
     const store = useVideosStore()
     await store.load()
     expect(await store.add('https://youtu.be/arj7oStGLkU')).toBeNull()
-    expect(store.addError).toContain('no English subtitles')
+    expect(store.addError).toContain('no German subtitles')
     expect(store.videos).toEqual([])
   })
 

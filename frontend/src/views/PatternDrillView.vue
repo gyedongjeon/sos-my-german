@@ -6,7 +6,7 @@ import { useSpeech } from '../composables/useSpeech'
 import { useDrillStore } from '../stores/drill'
 import { usePatternsStore } from '../stores/patterns'
 
-// One round of a sentence pattern: each sentence is shown in the learner's language and said in English.
+// One round of a sentence pattern: each sentence is shown in the learner's language and said in German.
 const props = defineProps<{ id: string }>()
 
 const patterns = usePatternsStore()
@@ -125,7 +125,7 @@ onBeforeUnmount(() => {
             </button>
             <template v-else>
               <button class="btn" :class="drill.last ? '' : 'btn-primary'" :disabled="busy" @click="startSpeaking">
-                {{ drill.last ? 'Say it again' : 'Say it in English' }}
+                {{ drill.last ? 'Say it again' : 'Say it in German' }}
               </button>
               <button v-if="drill.last" class="btn btn-primary" :disabled="busy" @click="next">
                 {{ drill.index + 1 < drill.items.length ? 'Next sentence' : 'Finish' }}

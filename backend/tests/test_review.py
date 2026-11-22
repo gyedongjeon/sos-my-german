@@ -10,12 +10,12 @@ from app.db import DB_PATH, SEED_TOPICS, get_connection, init_db
 from app.llm import LLMError
 
 OPENER = SEED_TOPICS[0][2]
-CORRECTION = {"original": "I go", "improved": "I went", "explanation": "Past tense."}
+CORRECTION = {"original": "Ich gehe", "improved": "Ich bin gegangen", "explanation": "Perfekt."}
 REVIEW = {
     "summary": "You kept the chat going and answered every question.",
     "strengths": ["You answered in full sentences."],
     "focus": ["Use the past tense for things that already happened."],
-    "phrases": [{"english": "I ended up going to the beach.", "note": "For a plan that changed."}],
+    "phrases": [{"german": "Am Ende sind wir an den Strand gegangen.", "note": "For a plan that changed."}],
 }
 
 
@@ -24,7 +24,7 @@ def model(monkeypatch):
     """The model answers a turn with one correction, and a review request with `model.review`."""
 
     def reply(system, user, **params):
-        return json.dumps({"reply": "Nice! Who did you go with?", "correction": CORRECTION})
+        return json.dumps({"reply": "Schön! Mit wem warst du da?", "correction": CORRECTION})
 
     def write(system, user, **params):
         write.system, write.user = system, user
@@ -46,11 +46,11 @@ def held(client, *said: str) -> int:
 
 
 def test_a_conversation_has_no_review_until_it_is_asked_for(client, model):
-    assert client.get(f"/api/conversations/{held(client, 'I go to the beach.')}").json()["review"] is None
+    assert client.get(f"/api/conversations/{held(client, 'Ich gehe an den Strand.')}").json()["review"] is None
 
 
 def test_a_review_is_written_and_saved_with_the_conversation(client, model):
-    conversation_id = held(client, "I go to the beach.")
+    conversation_id = held(client, "Ich gehe an den Strand.")
     response = client.post(f"/api/conversations/{conversation_id}/review")
     assert response.status_code == 200
     assert response.json() == REVIEW
@@ -58,24 +58,24 @@ def test_a_review_is_written_and_saved_with_the_conversation(client, model):
 
 
 def test_the_review_is_written_from_the_lines_and_their_corrections(client, model):
-    client.post(f"/api/conversations/{held(client, 'I go to the beach.')}/review")
+    client.post(f"/api/conversations/{held(client, 'Ich gehe an den Strand.')}/review")
     assert model.user.splitlines() == [
         f"Tutor: {OPENER}",
-        "Learner: I go to the beach.",
-        '  (corrected: "I go" -> "I went")',
-        "Tutor: Nice! Who did you go with?",
+        "Learner: Ich gehe an den Strand.",
+        '  (corrected: "Ich gehe" -> "Ich bin gegangen")',
+        "Tutor: Schön! Mit wem warst du da?",
     ]
 
 
 def test_the_review_is_written_in_the_feedback_language(client, model):
     client.put("/api/settings", json={"feedback_language": "Korean"})
-    client.post(f"/api/conversations/{held(client, 'I go to the beach.')}/review")
+    client.post(f"/api/conversations/{held(client, 'Ich gehe an den Strand.')}/review")
     assert "Korean" in model.system
 
 
 def test_each_list_of_a_review_is_kept_short(client, model):
     model.review = {**REVIEW, "strengths": ["a", "b", "c", "d"], "focus": [], "phrases": []}
-    written = client.post(f"/api/conversations/{held(client, 'I go to the beach.')}/review").json()
+    written = client.post(f"/api/conversations/{held(client, 'Ich gehe an den Strand.')}/review").json()
     assert written["strengths"] == ["a", "b", "c"]
     assert written["focus"] == [] and written["phrases"] == []
 
@@ -86,7 +86,7 @@ def test_a_conversation_in_which_nothing_was_said_cannot_be_reviewed(client, mod
 
 
 def test_a_review_that_cannot_be_written_is_reported_and_nothing_is_saved(client, model, monkeypatch):
-    conversation_id = held(client, "I go to the beach.")
+    conversation_id = held(client, "Ich gehe an den Strand.")
 
     def fail(system, user, **params):
         raise LLMError("The LLM provider is not responding.")
@@ -99,7 +99,7 @@ def test_a_review_that_cannot_be_written_is_reported_and_nothing_is_saved(client
 
 
 def test_saying_more_drops_the_review_because_it_no_longer_covers_the_conversation(client, model):
-    conversation_id = held(client, "I go to the beach.")
+    conversation_id = held(client, "Ich gehe an den Strand.")
     client.post(f"/api/conversations/{conversation_id}/review")
     client.post(f"/api/conversations/{conversation_id}/messages", json={"text": "With my friend."})
     assert client.get(f"/api/conversations/{conversation_id}").json()["review"] is None

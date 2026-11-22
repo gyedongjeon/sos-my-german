@@ -53,9 +53,9 @@ const numbers = computed(() => tally(props.messages))
       <div v-if="review.phrases.length">
         <h3 class="font-semibold">Worth trying next time</h3>
         <ul class="grid gap-2">
-          <li v-for="phrase in review.phrases" :key="phrase.english" class="flex flex-wrap items-center gap-x-2">
-            <span class="font-medium">{{ phrase.english }}</span>
-            <button class="btn btn-xs" @click="$emit('hear', phrase.english)">Hear it</button>
+          <li v-for="phrase in review.phrases" :key="phrase.german" class="flex flex-wrap items-center gap-x-2">
+            <span class="font-medium">{{ phrase.german }}</span>
+            <button class="btn btn-xs" @click="$emit('hear', phrase.german)">Hear it</button>
             <span class="basis-full text-sm text-base-content/70">{{ phrase.note }}</span>
           </li>
         </ul>

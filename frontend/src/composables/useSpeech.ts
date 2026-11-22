@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 
-// Reads text aloud with the backend's local Kokoro voice, falling back to the browser's
+// Reads text aloud with the backend's local Piper voice, falling back to the browser's
 // built-in voice (Web Speech API) when the backend cannot produce audio.
-export function useSpeech(lang = 'en-US') {
+export function useSpeech(lang = 'de-DE') {
   const browserVoice = 'speechSynthesis' in window
   const speaking = ref(false)
   let audio: HTMLAudioElement | null = null
