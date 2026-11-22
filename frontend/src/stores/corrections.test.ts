@@ -7,6 +7,8 @@ const saved = (id: string, improved: string, practiced = 0): SavedCorrection => 
   id,
   conversation_id: 1,
   pattern_id: null,
+  video: null,
+  position: null,
   title: 'Small talk',
   prompt: null,
   original: 'I go to the beach',
@@ -130,11 +132,20 @@ describe('corrections', () => {
 })
 
 describe('the source of a correction', () => {
-  it('is the conversation or the pattern it comes from', () => {
+  it('is the conversation, the pattern, or the sentence of the video it comes from', () => {
     expect(source(saved('m5', 'x'))).toEqual({ name: 'conversation', params: { id: 1 } })
     expect(source({ ...saved('p2', 'x'), conversation_id: null, pattern_id: 'should-have' })).toEqual({
       name: 'pattern',
       params: { id: 'should-have' },
     })
+    expect(source({ ...saved('s3', 'x'), conversation_id: null, video: 4, position: 7 })).toEqual({
+      name: 'video',
+      params: { id: 4 },
+      query: { line: 7 },
+    })
+  })
+
+  it('is none for a sentence of a video since deleted', () => {
+    expect(source({ ...saved('s3', 'x'), conversation_id: null })).toBeNull()
   })
 })

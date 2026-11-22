@@ -17,10 +17,13 @@ interface Checked {
   practiced: number
 }
 
-/** Where a correction comes from: its conversation or its pattern. */
-export function source(c: SavedCorrection): RouteLocationRaw {
+/** Where a correction comes from: its conversation, its pattern, or its sentence in a video;
+ * null for a sentence of a video since deleted. */
+export function source(c: SavedCorrection): RouteLocationRaw | null {
   if (c.pattern_id !== null) return { name: 'pattern', params: { id: c.pattern_id } }
-  return { name: 'conversation', params: { id: c.conversation_id } }
+  if (c.video !== null) return { name: 'video', params: { id: c.video }, query: { line: c.position ?? 0 } }
+  if (c.conversation_id !== null) return { name: 'conversation', params: { id: c.conversation_id } }
+  return null
 }
 
 /** The corrections of all saved conversations, practised by saying the better sentence aloud. */

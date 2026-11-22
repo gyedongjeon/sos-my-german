@@ -86,9 +86,12 @@ export interface ConversationSummary {
  */
 export interface SavedCorrection {
   id: string
-  /** Where it comes from: one of the two is set. `title` is the conversation's or the pattern's. */
+  /** Where it comes from: one of the three is set, or none for a video since deleted. `title` is the conversation's, the pattern's, or the video's. */
   conversation_id: number | null
   pattern_id: string | null
+  video: number | null
+  /** For a sentence of a video not said right after it: where it stands in the video. */
+  position: number | null
   title: string
   /** For a pattern mistake: the sentence that was to be said in German. */
   prompt: string | null
