@@ -6,7 +6,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from .llm import complete, format_conversation, parse_json_reply
-from .settings import feedback_language
+from .settings import feedback_language, not_german
 
 SPEAKERS = {"tutor": "Tutor", "learner": "Learner"}
 
@@ -57,7 +57,7 @@ invent a problem. In "explanation", talk about what to say, not how to write it.
 
 Write "explanation" in {language}, the learner's own language, whatever language the
 conversation is in: the learner reads it in {language}, and German examples may be quoted inside
-it. Keep "reply",
+it. {not_german} Keep "reply",
 "original", and "improved" in German.
 
 Reply with a single JSON object matching this schema, and nothing else:
@@ -72,8 +72,9 @@ def _spoken(text: str) -> list[str]:
 
 def tutor_reply(situation: str, messages: list[Message]) -> TutorReply:
     """Return the tutor's next line and a correction for the learner's latest message."""
+    language = feedback_language()
     system = SYSTEM_PROMPT.format(
-        situation=situation, language=feedback_language(), schema=TutorReply.model_json_schema()
+        situation=situation, language=language, not_german=not_german(language), schema=TutorReply.model_json_schema()
     )
     reply = complete(
         system,

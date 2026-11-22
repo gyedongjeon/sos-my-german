@@ -11,7 +11,7 @@ from .corrections import _words, keep_mistake
 from .db import get_connection
 from .llm import LLMError, complete, parse_json_reply
 from .pattern_list import LEVELS, PATTERNS, Pattern
-from .settings import feedback_language
+from .settings import feedback_language, not_german
 
 router = APIRouter(prefix="/api")
 
@@ -144,7 +144,7 @@ answer instead.
 explanation: when it was not correct, one or two sentences on what to change and why, talking
 about what to say, not how to write it; when the meaning was different, say so first. When it
 was correct, null. Write it in {language}, the learner's own language, whatever language the
-sentence is in; German words may be quoted inside it.
+sentence is in; German words may be quoted inside it. {not_german}
 
 Reply with a single JSON object matching this schema, and nothing else:
 {schema}"""
@@ -304,8 +304,9 @@ def check(pattern_id: str, body: Attempt) -> Verdict:
     if _words(body.said) == _words(body.answer):
         # The model answer itself, as heard: nothing to judge.
         return Verdict(correct=True, improved=body.answer)
+    language = feedback_language()
     system = CHECK_PROMPT.format(
-        **_for_prompt(pattern), language=feedback_language(), schema=Verdict.model_json_schema()
+        **_for_prompt(pattern), language=language, not_german=not_german(language), schema=Verdict.model_json_schema()
     )
     user = f"Shown to the learner: {body.prompt}\nModel answer: {body.answer}\nThe learner said: {body.said}"
     try:

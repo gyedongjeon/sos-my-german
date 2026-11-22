@@ -91,6 +91,13 @@ def test_what_was_said_is_judged_by_the_model(client, model):
     assert all(text in user for text in ATTEMPT.values())
 
 
+def test_a_verdict_is_explained_in_the_learners_language_not_german(client, model):
+    model.reply = VERDICT
+    client.put("/api/settings", json={"feedback_language": "Korean"})
+    client.post("/api/patterns/haette-sollen/check", json=ATTEMPT)
+    assert "Do not use German" in model.calls[0][0]
+
+
 def test_the_model_answer_said_as_it_is_needs_no_model(client):
     # The LLM is not mocked here: reaching it would fail the test. Spoken, so punctuation,
     # capitals, and short forms do not matter.

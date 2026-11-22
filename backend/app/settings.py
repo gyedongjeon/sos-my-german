@@ -29,6 +29,14 @@ def feedback_language() -> str:
     return _get("feedback_language") or os.environ.get("FEEDBACK_LANGUAGE", "").strip() or "English"
 
 
+def not_german(language: str) -> str:
+    """A rule for a prompt whose text the learner reads in their language: after a conversation
+    in German the model tends to go on in German. Empty when German is the chosen language."""
+    if language.strip().lower() == "german":
+        return ""
+    return f"Do not use German for it, apart from German words and examples quoted in {language}."
+
+
 @router.get("/settings", response_model=Settings)
 def get_settings() -> Settings:
     return Settings(feedback_language=_get("feedback_language"))

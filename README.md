@@ -27,7 +27,7 @@ from which it was made, and [SOS My Interview](https://github.com/gyedongjeon/so
 - **History**: every conversation is saved as you have it, with its corrections, so you can read it and hear it again.
 - **Explanations in your language**: corrections are explained in Korean, English, Japanese, Chinese, and more; the conversation stays in German. Your partner says "du" or "Sie" as the situation calls for.
 - **Topics from what you read**: paste a link to an article or a speech, or its text, and get a topic to discuss it, with a short summary to talk from.
-- **Private by default**: speech-to-text and your partner's voice run locally, and your data stays on your computer. Only the text of the conversation, and a text or page you make a topic from, goes to the LLM provider you choose, with your own API key. Videos are streamed from YouTube; a part of a video's subtitles is sent to estimate its level and to find videos like it, and a sentence you make a pattern from. Turning on a video's translation sends all its subtitles.
+- **Private by default**: speech-to-text and your partner's voice run locally, and your data stays on your computer. Only the text of the conversation, and a text or page you make a topic from, goes to the LLM provider you choose, with your own API key. Videos are streamed from YouTube; a part of a video's subtitles is sent to estimate its level and to find videos like it, all of them when they have no punctuation, and a sentence you make a pattern from. Turning on a video's translation sends all its subtitles.
 
 The app runs locally for a single user; there is no account, server, or deployment.
 
@@ -198,8 +198,16 @@ search asks the LLM up to seven times and takes about ten seconds.
 - The subtitles are read, and YouTube is searched, the way YouTube's own page does it, not
   through an official interface, so this can stop working when YouTube changes something. A video whose owner does
   not allow embedding cannot be played.
-- Subtitles stay on this computer and are not sent anywhere; deleting a video deletes them.
-- Automatic subtitles often have no punctuation. They are then kept line by line.
+- Subtitles are kept on this computer; deleting a video deletes them. Besides the parts sent to
+  estimate a level, all of them are sent to the LLM when they have no punctuation (below).
+- **Automatic subtitles.** YouTube's automatic German subtitles have no punctuation, so they
+  cannot be cut at sentence ends. When a video is added with such subtitles, the LLM adds the
+  punctuation and the capitals, up to 300 words a request (about ten seconds for a twenty-minute
+  video). Only the marks and the capitals are taken from its reply: every word stays as YouTube
+  wrote it, even where the LLM "corrected" a recognition error, and keeps its time. A part whose
+  reply is too unlike the words (fewer than nine in ten found in it), and the whole video when no
+  model is set up, is kept line by line as YouTube shows it. A video added before this was in
+  place keeps its lines; delete it and add it again to have it cut into sentences.
 
 ### Practising corrections
 The Corrections page lists the fixes from all saved conversations and the sentences you got

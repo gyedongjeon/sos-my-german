@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 from .conversation import SPEAKERS, Correction
 from .llm import complete, parse_json_reply
-from .settings import feedback_language
+from .settings import feedback_language, not_german
 
 # A review is read at a glance after speaking; each of its lists is cut to this many items.
 MAX_ITEMS = 3
@@ -48,6 +48,7 @@ or when to use it.
 Write "summary", "strengths", "focus", and every "note" in {language}, the learner's own
 language, whatever language the conversation was in: the learner reads them in {language}.
 German words and examples may be quoted inside them. Only "german" is always written in German.
+{not_german}
 
 Reply with a single JSON object matching this schema, and nothing else:
 {schema}"""
@@ -65,8 +66,13 @@ def _transcript(lines: list[tuple[str, str, Correction | None]]) -> str:
 
 def write_review(situation: str, lines: list[tuple[str, str, Correction | None]]) -> Review:
     """Review a conversation given as (role, text, correction) lines in the order they were said."""
+    language = feedback_language()
     system = SYSTEM_PROMPT.format(
-        situation=situation, language=feedback_language(), max_items=MAX_ITEMS, schema=Review.model_json_schema()
+        situation=situation,
+        language=language,
+        not_german=not_german(language),
+        max_items=MAX_ITEMS,
+        schema=Review.model_json_schema(),
     )
     reply = complete(
         system,
