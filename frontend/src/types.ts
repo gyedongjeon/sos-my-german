@@ -222,3 +222,13 @@ export interface LLMSettings {
   source: 'app' | 'env' | null
   key_hint: string | null
 }
+
+/** A voice the partner can speak with. */
+export interface VoiceStatus {
+  id: string
+  label: string
+  /** Bytes downloaded the first time it is chosen, and whether that has happened. */
+  size: number
+  downloaded: boolean
+  chosen: boolean
+}

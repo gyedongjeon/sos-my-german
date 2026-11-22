@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from . import speech, transcribe
@@ -36,3 +36,40 @@ def download_models() -> list[ModelStatus]:
     transcribe.model_download.start()
     speech.model_download.start()
     return _statuses()
+
+
+class VoiceStatus(BaseModel):
+    id: str
+    label: str
+    # Bytes to download the first time it is chosen, and whether it is already there.
+    size: int
+    downloaded: bool
+    chosen: bool
+
+
+class VoiceChoice(BaseModel):
+    voice: str
+
+
+def _voices() -> list[VoiceStatus]:
+    chosen = speech.current_voice()
+    return [
+        VoiceStatus(id=v.id, label=v.label, size=v.size, downloaded=speech.is_downloaded(v.id), chosen=v.id == chosen)
+        for v in speech.VOICES.values()
+    ]
+
+
+@router.get("/voices", response_model=list[VoiceStatus])
+def list_voices() -> list[VoiceStatus]:
+    """The voices the partner can speak with, and which one it does."""
+    return _voices()
+
+
+@router.put("/voice", response_model=list[VoiceStatus])
+def choose_voice(body: VoiceChoice) -> list[VoiceStatus]:
+    """Have the partner speak with another voice; it is downloaded the first time."""
+    try:
+        speech.choose_voice(body.voice)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+    return _voices()

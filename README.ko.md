@@ -71,6 +71,7 @@ Intel Mac, Linux용 설치 파일은 아직 없습니다. [소스에서 실행](
 
 1. **Feedback language**: 교정 설명을 받을 언어를 고릅니다. 시스템 언어가 한국어면 한국어가 미리 선택되어 있습니다.
 2. **AI model**: 사용할 AI 서비스(Provider)와 모델을 고르고, 그 서비스의 API 키를 붙여 넣은 뒤 "Save and test"를 누릅니다.
+3. **Partner's voice**(선택): 상대 목소리를 남성 3명(Thorsten, Karlsson, Pavoque)과 여성 3명(Kerstin, Ramona, Eva) 중에서 고를 수 있습니다. 기본은 가장 자연스러운 Thorsten이고, 다른 목소리는 처음 고를 때 한 번 내려받습니다(21~114MB). "Hear it"으로 미리 들어 볼 수 있습니다.
 
 Google Gemini, Claude, OpenAI, OpenRouter 등을 쓸 수 있습니다. API 키는 내 컴퓨터에만 저장되고, 저장한 뒤에는 화면에 다시 표시되지 않으며, 선택한 서비스로만 전송됩니다.
 

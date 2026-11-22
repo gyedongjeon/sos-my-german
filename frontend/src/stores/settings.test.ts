@@ -59,3 +59,51 @@ describe('feedback language', () => {
     expect(store.error).toBe('Could not save the language: disk full')
   })
 })
+
+describe('partner voice', () => {
+  const VOICES = [
+    { id: 'de_DE-thorsten-high', label: 'Thorsten · male · best quality', size: 113900076, downloaded: true, chosen: true },
+    { id: 'de_DE-kerstin-low', label: 'Kerstin · female', size: 63108684, downloaded: false, chosen: false },
+  ]
+
+  function voiceBackend(fail = false) {
+    const asked: string[] = []
+    vi.stubGlobal('fetch', async (url: string, init?: RequestInit) => {
+      asked.push(`${init?.method ?? 'GET'} ${url}`)
+      if (fail) return new Response(JSON.stringify({ detail: 'Unknown voice' }), { status: 422 })
+      if (init?.method === 'PUT') {
+        const wanted = JSON.parse(init.body as string).voice
+        return new Response(JSON.stringify(VOICES.map((v) => ({ ...v, chosen: v.id === wanted }))), { status: 200 })
+      }
+      return new Response(JSON.stringify(VOICES), { status: 200 })
+    })
+    return asked
+  }
+
+  it('lists the voices and which one is chosen', async () => {
+    voiceBackend()
+    const store = useSettingsStore()
+    await store.loadVoices()
+    expect(store.voices.map((v) => v.id)).toEqual(['de_DE-thorsten-high', 'de_DE-kerstin-low'])
+    expect(store.voice).toBe('de_DE-thorsten-high')
+  })
+
+  it('chooses another voice', async () => {
+    const asked = voiceBackend()
+    const store = useSettingsStore()
+    await store.loadVoices()
+    expect(await store.setVoice('de_DE-kerstin-low')).toBe(true)
+    expect(store.voice).toBe('de_DE-kerstin-low')
+    expect(asked).toContain('PUT /api/voice')
+  })
+
+  it('keeps the voice and says why when choosing fails', async () => {
+    voiceBackend()
+    const store = useSettingsStore()
+    await store.loadVoices()
+    voiceBackend(true)
+    expect(await store.setVoice('de_DE-kerstin-low')).toBe(false)
+    expect(store.voice).toBe('de_DE-thorsten-high')
+    expect(store.error).toContain('Could not change the voice')
+  })
+})

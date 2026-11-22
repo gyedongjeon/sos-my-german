@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { api } from '../api'
+import { useSpeech } from '../composables/useSpeech'
+import { megabytes, useModelsStore } from '../stores/models'
 import { LANGUAGES, useSettingsStore } from '../stores/settings'
 import type { LLMSettings } from '../types'
 
@@ -121,7 +123,28 @@ async function remove() {
   }
 }
 
+// The partner's voice: chosen from a few, heard before or after choosing it.
+const SAMPLE = 'Hallo! Schön, dich zu sehen. Wie war deine Woche bisher?'
+const speech = useSpeech()
+const models = useModelsStore()
+const chosenVoice = computed(() => store.voices.find((v) => v.chosen) ?? null)
+
+// Once a download ends, the list says which voices are there.
+watch(
+  () => models.active.length,
+  (now, before) => {
+    if (before && !now) void store.loadVoices()
+  },
+)
+
+async function chooseVoice(voice: string) {
+  speech.stop()
+  // The download it starts is shown under the navigation bar.
+  if (await store.setVoice(voice)) await models.check()
+}
+
 onMounted(async () => {
+  void store.loadVoices()
   await store.loadLLM()
   if (store.llm) show(store.llm)
 })
@@ -157,6 +180,39 @@ onMounted(async () => {
             Starts from your browser's language. Saved as soon as you pick one.
           </span>
         </label>
+      </div>
+    </section>
+
+    <section class="card mt-4 bg-base-100 shadow-sm">
+      <div class="card-body gap-4">
+        <div>
+          <h2 class="card-title">Partner's voice</h2>
+          <p class="text-sm text-base-content/70">
+            The German voice your partner speaks with. Each one runs on this computer and is downloaded the first time you
+            choose it.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-end gap-2">
+          <label class="flex min-w-64 flex-1 flex-col gap-1">
+            <span class="text-sm font-medium">Voice</span>
+            <select
+              class="select w-full"
+              :value="store.voice ?? ''"
+              :disabled="!store.voices.length"
+              @change="chooseVoice(($event.target as HTMLSelectElement).value)"
+            >
+              <option v-for="v in store.voices" :key="v.id" :value="v.id">
+                {{ v.label }}{{ v.downloaded ? '' : ` (${megabytes(v.size)} MB to download)` }}
+              </option>
+            </select>
+          </label>
+          <button class="btn" :disabled="!chosenVoice" @click="speech.speaking.value ? speech.stop() : speech.speak(SAMPLE)">
+            {{ speech.speaking.value ? 'Stop' : 'Hear it' }}
+          </button>
+        </div>
+        <span v-if="chosenVoice && !chosenVoice.downloaded" class="text-xs text-base-content/60">
+          Until it is downloaded, your partner speaks with your computer's own voice.
+        </span>
       </div>
     </section>
 
