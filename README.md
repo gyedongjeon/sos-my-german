@@ -176,7 +176,10 @@ Without a configured model a video is saved without a level.
 heard. The recording is transcribed locally and compared with the sentence word by word (no
 LLM): the page shows the share of words that came through and marks the ones that did not.
 Punctuation and capitals are ignored, "geht's" equals "geht es", "ß" equals "ss", and "drei"
-equals "3". Each sentence keeps its best score.
+equals "3". Each sentence keeps its best score. A sentence not said in full goes to the
+Corrections page, with the words that were not heard and what was heard in their place
+("Lücken" heard as "Locken"). Every try, right or not, is also logged with the sentence and what
+was heard, so the words you are often not heard saying can be looked into later.
 
 **Translation.** "Translation" on a video's page shows each sentence in your feedback
 language under the German. The first time it is turned on for a video, all of the video's
@@ -208,8 +211,10 @@ search asks the LLM up to seven times and takes about ten seconds.
 - The subtitles are read, and YouTube is searched, the way YouTube's own page does it, not
   through an official interface, so this can stop working when YouTube changes something. A video whose owner does
   not allow embedding cannot be played.
-- Subtitles are kept on this computer; deleting a video deletes them. Besides the parts sent to
-  estimate a level, all of them are sent to the LLM when they have no punctuation (below).
+- Subtitles are kept on this computer; deleting a video deletes them, but not its sentences on
+  the Corrections page (left without a link to the video) or the log of your tries at saying
+  them after it. Besides the parts sent to estimate a level, all of them are sent to the LLM
+  when they have no punctuation (below).
 - **Automatic subtitles.** YouTube's automatic German subtitles have no punctuation, so they
   cannot be cut at sentence ends. When a video is added with such subtitles, the LLM adds the
   punctuation and the capitals, up to 300 words a request (about ten seconds for a twenty-minute
@@ -220,8 +225,9 @@ search asks the LLM up to seven times and takes about ten seconds.
   place keeps its lines; delete it and add it again to have it cut into sentences.
 
 ### Practising corrections
-The Corrections page lists the fixes from all saved conversations and the sentences you got
-wrong in pattern practice (with the sentence that was asked for). "Say it" records you, the
+The Corrections page lists the fixes from all saved conversations, the sentences you got
+wrong in pattern practice (with the sentence that was asked for), and the sentences of a video
+you did not say in full after it (with the words that were not heard, linked to the sentence). "Say it" records you, the
 recording is transcribed locally like any other line, and the words are compared with the better
 sentence: punctuation and capitals are ignored, "geht's" equals "geht es", "ß" equals "ss", and
 the sentence may be part of something longer. A match is counted ("Said right ×2"); otherwise the page shows what was heard
@@ -229,7 +235,8 @@ and which words were missing. Speech recognition mishears too, so a try can be c
 No LLM is used for this. A correction can be removed from the list; one from a conversation
 stays in that conversation. Deleting a conversation removes its corrections. In pattern
 practice, a new wrong try at the same sentence replaces the earlier one, and an answer that was
-only shown, not tried, is not kept.
+only shown, not tried, is not kept. In shadowing, likewise, a new try at the same sentence that
+is not in full replaces the earlier one.
 
 ### Speech-to-text
 What you say is transcribed locally with [Whisper](https://github.com/SYSTRAN/faster-whisper): no

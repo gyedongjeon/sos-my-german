@@ -573,11 +573,36 @@ def search_lines(q: str = Query(min_length=1, max_length=200)) -> list[Hit]:
     return [Hit(**dict(row)) for row in rows]
 
 
+def _not_heard(words: list[ShadowedWord], said: list[str]) -> str:
+    """The words of a sentence that were not heard, each with what was heard in its place, if
+    anything: 'Not heard: “gaps” (heard “guess”).' Words missed side by side are named together."""
+    # Each word as spoken, with the written word it belongs to.
+    spoken = [(word, i) for i, written in enumerate(words) for word in _words(written.text)]
+    matcher = SequenceMatcher(None, [word for word, _ in spoken], said, autojunk=False)
+    # The written words missed together, by the first of them, and what was heard instead.
+    together: dict[int, int] = {}
+    instead: dict[int, str] = {}
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        missed = sorted({spoken[k][1] for k in range(i1, i2)} - {i for i, w in enumerate(words) if w.heard})
+        if tag == "replace" and missed:
+            instead[missed[0]] = " ".join(said[j1:j2])
+            together.update((i, missed[0]) for i in missed)
+    groups: dict[int, list[str]] = {}
+    for i, word in enumerate(words):
+        if not word.heard:
+            groups.setdefault(together.get(i, i), []).append(word.text.strip(MARKS))
+    named = [f"“{' '.join(group)}”" + (f" (heard “{instead[first]}”)" if first in instead else "") for first, group in groups.items()]
+    return f"Not heard: {', '.join(named)}."
+
+
 @router.post("/video-lines/{line}/attempts", response_model=Shadowed)
 def shadow(line: int, body: Said) -> Shadowed:
     """Compare what the learner said after the video with the sentence, word by word."""
     with get_connection() as conn:
-        found = conn.execute("SELECT text, shadowed, best FROM video_lines WHERE id = ?", (line,)).fetchone()
+        found = conn.execute(
+            "SELECT l.text, l.shadowed, l.best, v.title FROM video_lines l JOIN videos v ON v.id = l.video WHERE l.id = ?",
+            (line,),
+        ).fetchone()
         if found is None:
             raise HTTPException(status_code=404, detail="Sentence not found")
         left = _words(body.text)
@@ -596,4 +621,19 @@ def shadow(line: int, body: Said) -> Shadowed:
         accuracy = int(100 * heard_count / counted + 0.5) if counted else 0
         best = max(accuracy, found["best"] or 0)
         conn.execute("UPDATE video_lines SET shadowed = shadowed + 1, best = ? WHERE id = ?", (best, line))
+        conn.execute(
+            "INSERT INTO shadowing_attempts (line, sentence, said, accuracy) VALUES (?, ?, ?, ?)",
+            (line, found["text"], body.text, accuracy),
+        )
+        if accuracy < 100:
+            # Kept with the corrections; a new wrong try replaces the last one, to be practised again.
+            conn.execute(
+                """
+                INSERT INTO shadowing_mistakes (line, title, said, improved, explanation) VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT (line) DO UPDATE SET
+                    title = excluded.title, said = excluded.said, improved = excluded.improved, explanation = excluded.explanation,
+                    practiced = 0, practiced_at = NULL, created_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+                """,
+                (line, found["title"], body.text, found["text"], _not_heard(words, _words(body.text))),
+            )
     return Shadowed(accuracy=accuracy, words=words, shadowed=found["shadowed"] + 1, best=best)

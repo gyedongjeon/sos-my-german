@@ -482,6 +482,38 @@ def init_db() -> None:
             )
             """
         )
+        # A sentence of a video not said right after it, kept to be practised again next to the
+        # corrections. One row for each sentence; a new wrong try replaces what was said. It keeps
+        # the sentence and the video's title, so it outlives the video, without a link to it.
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS shadowing_mistakes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                line INTEGER UNIQUE REFERENCES video_lines(id) ON DELETE SET NULL,
+                title TEXT NOT NULL,
+                said TEXT NOT NULL,
+                improved TEXT NOT NULL,
+                explanation TEXT NOT NULL,
+                practiced INTEGER NOT NULL DEFAULT 0,
+                practiced_at TEXT,
+                created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+            )
+            """
+        )
+        # Every try at saying a sentence after a video, right or not, to find the words the
+        # learner is often not heard saying. It keeps the sentence, so it outlives the video.
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS shadowing_attempts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                line INTEGER REFERENCES video_lines(id) ON DELETE SET NULL,
+                sentence TEXT NOT NULL,
+                said TEXT NOT NULL,
+                accuracy INTEGER NOT NULL,
+                created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+            )
+            """
+        )
         # When a line's correction was made, to order it among the pattern mistakes, and whether
         # the learner took it off the list of corrections (it stays in its conversation).
         _add_column(conn, "messages", "corrected_at", "TEXT")

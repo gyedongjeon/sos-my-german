@@ -23,15 +23,19 @@ NUMBERS["zwo"] = "2"
 
 
 class SavedCorrection(BaseModel):
-    """A sentence to practise again: a correction made in a saved conversation, or a sentence
-    got wrong in pattern practice. It also says how often it was practised since."""
+    """A sentence to practise again: a correction made in a saved conversation, a sentence got
+    wrong in pattern practice, or one of a video not said right after it. It also says how often
+    it was practised since."""
 
-    # "m" and the id of the learner's line it was made on, or "p" and the id of the mistake.
+    # "m" and the id of the learner's line it was made on, or "p" or "s" and the id of the mistake.
     id: str
-    # Where it comes from: one of the two is set. `title` is the conversation's title or the
-    # pattern's formula.
+    # Where it comes from: one of the three is set, or none for a sentence of a video since
+    # deleted. `title` is the conversation's title, the pattern's formula, or the video's title.
     conversation_id: int | None = None
     pattern_id: str | None = None
+    video: int | None = None
+    # For a shadowing mistake: where the sentence stands in its video.
+    position: int | None = None
     title: str
     # For a pattern mistake: the sentence that was to be said in German.
     prompt: str | None = None
@@ -85,7 +89,11 @@ def _missing(said: list[str], wanted: list[str]) -> list[str]:
 
 # Where each kind of correction is stored, by the letter its id starts with: the table, and the
 # column that holds the better sentence.
-KINDS = {"m": ("messages", "correction_improved"), "p": ("pattern_mistakes", "improved")}
+KINDS = {
+    "m": ("messages", "correction_improved"),
+    "p": ("pattern_mistakes", "improved"),
+    "s": ("shadowing_mistakes", "improved"),
+}
 NOW = "strftime('%Y-%m-%dT%H:%M:%SZ', 'now')"
 
 
@@ -99,21 +107,26 @@ def _locate(correction_id: str) -> tuple[str, str, int]:
 
 @router.get("/corrections", response_model=list[SavedCorrection])
 def list_corrections() -> list[SavedCorrection]:
-    """Every correction of the saved conversations and every sentence got wrong in pattern
-    practice, newest first."""
+    """Every correction of the saved conversations, every sentence got wrong in pattern practice,
+    and every sentence of a video not said right after it, newest first."""
     with get_connection() as conn:
         rows = conn.execute(
             """
-            SELECT 'm' || m.id AS id, m.conversation_id, NULL AS pattern_id, c.title, NULL AS prompt,
+            SELECT 'm' || m.id AS id, m.conversation_id, NULL AS pattern_id, NULL AS video,
+                   NULL AS position, c.title, NULL AS prompt,
                    m.correction_original AS original, m.correction_improved AS improved,
                    m.correction_explanation AS explanation, m.practiced, m.practiced_at,
                    COALESCE(m.corrected_at, c.started_at) AS made_at, m.id AS row
             FROM messages m JOIN conversations c ON c.id = m.conversation_id
             WHERE m.correction_improved IS NOT NULL AND m.dismissed = 0
             UNION ALL
-            SELECT 'p' || id, NULL, pattern_id, pattern, prompt, said, improved, explanation,
+            SELECT 'p' || id, NULL, pattern_id, NULL, NULL, pattern, prompt, said, improved, explanation,
                    practiced, practiced_at, created_at, id
             FROM pattern_mistakes
+            UNION ALL
+            SELECT 's' || s.id, NULL, NULL, l.video, l.position, s.title, NULL, s.said, s.improved,
+                   s.explanation, s.practiced, s.practiced_at, s.created_at, s.id
+            FROM shadowing_mistakes s LEFT JOIN video_lines l ON l.id = s.line
             ORDER BY made_at DESC, row DESC
             """
         ).fetchall()
@@ -152,7 +165,7 @@ def remove(correction_id: str) -> Response:
                 (row_id,),
             )
         else:
-            gone = conn.execute("DELETE FROM pattern_mistakes WHERE id = ?", (row_id,))
+            gone = conn.execute(f"DELETE FROM {table} WHERE id = ?", (row_id,))
     if gone.rowcount == 0:
         raise HTTPException(status_code=404, detail="Correction not found")
     return Response(status_code=204)

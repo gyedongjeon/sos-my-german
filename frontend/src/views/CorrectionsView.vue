@@ -3,9 +3,9 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import MorseSignal from '../components/MorseSignal.vue'
 import { micProblem, useRecorder } from '../composables/useRecorder'
 import { useSpeech } from '../composables/useSpeech'
-import { useCorrectionsStore } from '../stores/corrections'
+import { source, useCorrectionsStore } from '../stores/corrections'
 
-// Every correction from the saved conversations, to practise by saying the better sentence aloud.
+// Every correction from the saved conversations, pattern practice, and shadowing, to practise by saying the better sentence aloud.
 const store = useCorrectionsStore()
 const speech = useSpeech()
 const recorder = useRecorder()
@@ -62,8 +62,8 @@ onBeforeUnmount(() => {
   <main class="mx-auto max-w-3xl p-4 sm:p-6">
     <h1 class="text-2xl font-semibold">Corrections</h1>
     <p class="text-sm text-base-content/70">
-      The fixes from your conversations and the sentences you got wrong in pattern practice. Listen to the better
-      sentence, then say it yourself until it comes out right.
+      The fixes from your conversations, the sentences you got wrong in pattern practice, and the sentences of a video
+      you did not say right after it. Listen to the better sentence, then say it yourself until it comes out right.
     </p>
 
     <div v-if="store.loading" class="flex justify-center py-16">
@@ -74,7 +74,7 @@ onBeforeUnmount(() => {
 
       <div v-if="!store.items.length && !store.error" class="card card-border mt-4 bg-base-100">
         <div class="card-body items-start">
-          <p>No corrections yet. They appear here as you get them in a conversation or in pattern practice.</p>
+          <p>No corrections yet. They appear here as you get them in a conversation, in pattern practice, or saying a video's sentences after it.</p>
           <RouterLink class="btn btn-primary btn-sm" :to="{ name: 'home' }">Pick a topic</RouterLink>
         </div>
       </div>
@@ -112,16 +112,10 @@ onBeforeUnmount(() => {
                 <MorseSignal animated /> Listening to what you said…
               </span>
               <span v-if="c.practiced" class="badge badge-success badge-soft">Said right ×{{ c.practiced }}</span>
-              <RouterLink
-                class="link ml-auto text-xs text-base-content/60"
-                :to="
-                  c.pattern_id !== null
-                    ? { name: 'pattern', params: { id: c.pattern_id } }
-                    : { name: 'conversation', params: { id: c.conversation_id } }
-                "
-              >
+              <RouterLink v-if="source(c)" class="link ml-auto text-xs text-base-content/60" :to="source(c)!">
                 From “{{ c.title }}”
               </RouterLink>
+              <span v-else class="ml-auto text-xs text-base-content/60">From “{{ c.title }}” (deleted)</span>
               <template v-if="confirming === c.id">
                 <button class="btn btn-error btn-xs" @click="remove(c.id)">Remove for good</button>
                 <button class="btn btn-ghost btn-xs" @click="confirming = null">Keep</button>
