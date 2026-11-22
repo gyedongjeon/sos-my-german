@@ -436,6 +436,18 @@ def init_db() -> None:
         _add_column(conn, "video_lines", "shadowed", "INTEGER NOT NULL DEFAULT 0")
         _add_column(conn, "video_lines", "best", "INTEGER")
         conn.execute("CREATE INDEX IF NOT EXISTS video_lines_by_video ON video_lines (video, position)")
+        # A sentence of a video in the learner's language, written when the learner asks for the
+        # translation; one for each language it was asked in.
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS line_translations (
+                line INTEGER NOT NULL REFERENCES video_lines(id) ON DELETE CASCADE,
+                language TEXT NOT NULL,
+                text TEXT NOT NULL,
+                PRIMARY KEY (line, language)
+            )
+            """
+        )
         # A sentence pattern the learner made from a sentence of a video. The sentence is kept
         # as its example, so the pattern outlives the video.
         conn.execute(
