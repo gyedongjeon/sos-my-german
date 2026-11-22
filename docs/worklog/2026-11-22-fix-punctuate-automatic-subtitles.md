@@ -36,6 +36,13 @@ into sentences where possible.
   their lines; deleting and adding one again cuts it into sentences.
 - **Privacy**: all the subtitles of a video without punctuation are sent to the LLM provider
   when it is added; the README says so.
+- **The review in German, again**: while this was checked, the live review test failed 1 of 4
+  runs, the review written in German though Korean was chosen. The wording "whatever language
+  the conversation was in" (from `feat/init`) had replaced "not in German", which cannot be said
+  when German is the chosen language. `settings.not_german` now adds "Do not use German for it,
+  …" to the prompts of a correction, a pattern verdict, and the review, unless German is chosen.
+- **Merged with `main`** after the video translation was merged: both changed the same lines of
+  the READMEs and both added a live test at the end of `test_live_llm.py`; both sides were kept.
 - **Alternatives considered**: cutting at pauses alone (pauses in speech do not follow sentences
   closely enough), and transcribing the video's audio with the local Whisper model, which writes
   punctuation (the video would have to be downloaded, which the app does not do).
@@ -43,7 +50,7 @@ into sentences where possible.
 ## Verification
 
 - `cd backend && uv run pytest`: 226 passed (7 new, in `tests/test_punctuation.py`), 11 live
-  tests deselected.
+  tests deselected, before the merge.
 - New live test, `uv run --env-file .env pytest -m live -k automatic_subtitles` (Gemini):
   passed; four unpunctuated lines with a recognition error came back cut at sentence ends, with
   every word as it was.
@@ -51,4 +58,6 @@ into sentences where possible.
   subtitle lines) was saved in 11.9 s as 230 sentences instead of 281 lines, for example
   "Hallo, ich bin Kari und ich bin Janusch, und wir zeigen euch heute die wichtigsten
   Begrüßungen und Verabschiedungen in der deutschen Sprache."; the longest has 30 words.
+- After the merge and the prompt change: `uv run pytest` 237 passed; the live review test passed
+  6 runs in a row, and the whole live suite (12 tests) passed twice.
 - Not verified: the videos page in the running app (the API's lines are what the page lists).
