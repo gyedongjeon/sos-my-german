@@ -57,6 +57,7 @@ def test_corrections_are_explained_in_the_chosen_language(client, model):
     client.put("/api/settings", json={"feedback_language": "Korean"})
     client.post(f"/api/conversations/{say(client)}/reply")
     assert 'Write "explanation" in Korean' in model.system
+    assert "Do not use German" in model.system
 
 
 def test_reply_reports_a_model_failure(client, model):

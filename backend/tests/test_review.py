@@ -111,3 +111,13 @@ def test_a_database_from_before_reviews_gains_the_column(client):
     init_db()
     with get_connection() as conn:
         assert "review" in [column[1] for column in conn.execute("PRAGMA table_info(conversations)")]
+
+
+def test_the_review_is_not_written_in_german_unless_german_was_chosen(client, model):
+    # After a conversation in German the model tends to keep writing German.
+    client.put("/api/settings", json={"feedback_language": "Korean"})
+    client.post(f"/api/conversations/{held(client, 'Ich gehe an den Strand.')}/review")
+    assert "Do not use German" in model.system
+    client.put("/api/settings", json={"feedback_language": "German"})
+    client.post(f"/api/conversations/{held(client, 'Ich gehe an den Strand.')}/review")
+    assert "Do not use German" not in model.system
