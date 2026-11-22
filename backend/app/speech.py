@@ -8,10 +8,12 @@ import ssl
 import threading
 import urllib.request
 import wave
+from dataclasses import dataclass
 
 import certifi
 from piper import PiperVoice
 
+from .db import get_connection
 from .downloads import Download
 from .paths import DATA_DIR
 
@@ -19,19 +21,56 @@ TTS_DIR = DATA_DIR / "tts"
 CACHE_DIR = TTS_DIR / "cache"
 # Piper's voices, pinned to a release of the collection; a voice is downloaded on first use.
 RELEASE_URL = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0"
-# A German voice of high quality (~114 MB). Others are named the same way, as
-# <language>_<REGION>-<name>-<quality>, for example "de_DE-kerstin-low".
-DEFAULT_VOICE = "de_DE-thorsten-high"
 
-# Size of the default voice's two files, for showing download progress.
-EXPECTED_BYTES = 113_895_201 + 4_875
+
+@dataclass(frozen=True)
+class Voice:
+    id: str
+    label: str
+    # The size of its two files, for showing download progress.
+    size: int
+
+
+# The German voices of the collection with one speaker each, best first: Thorsten is the only
+# one in high quality; the others are in low quality, Eva in the lowest. Another Piper voice can
+# still be set with TTS_VOICE, named the same way, <language>_<REGION>-<name>-<quality>.
+VOICES = {
+    voice.id: voice
+    for voice in (
+        Voice("de_DE-thorsten-high", "Thorsten · male · best quality", 113_895_201 + 4_875),
+        Voice("de_DE-kerstin-low", "Kerstin · female", 63_104_526 + 4_158),
+        Voice("de_DE-ramona-low", "Ramona · female", 63_104_526 + 4_157),
+        Voice("de_DE-eva_k-x_low", "Eva · female · lower quality", 20_628_813 + 4_158),
+        Voice("de_DE-karlsson-low", "Karlsson · male", 63_104_526 + 4_159),
+        Voice("de_DE-pavoque-low", "Pavoque · male", 63_104_526 + 4_158),
+    )
+}
+DEFAULT_VOICE = "de_DE-thorsten-high"
 
 _voices: dict[str, PiperVoice] = {}
 _lock = threading.Lock()
 
 
-def _voice() -> str:
+def current_voice() -> str:
+    """The voice chosen on the Settings page, else TTS_VOICE, else the default."""
+    with get_connection() as conn:
+        row = conn.execute("SELECT value FROM settings WHERE key = 'voice'").fetchone()
+    if row and row["value"] in VOICES:
+        return row["value"]
     return os.environ.get("TTS_VOICE", "").strip() or DEFAULT_VOICE
+
+
+def choose_voice(voice: str) -> None:
+    """Keep a listed voice as the partner's, and start downloading it if it is not there."""
+    if voice not in VOICES:
+        raise ValueError(f"Unknown voice: {voice}")
+    with get_connection() as conn:
+        conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('voice', ?)", (voice,))
+    model_download.start()
+
+
+def is_downloaded(voice: str) -> bool:
+    return all((TTS_DIR / name).exists() for name in model_files(voice))
 
 
 def model_files(voice: str) -> tuple[str, str]:
@@ -47,18 +86,18 @@ def _voice_url(voice: str, name: str) -> str:
 
 
 def _is_downloaded() -> bool:
-    return all((TTS_DIR / name).exists() for name in model_files(_voice()))
+    return is_downloaded(current_voice())
 
 
 def _downloaded_bytes() -> int:
     """Bytes of the voice's files on disk, counting a file that is still being downloaded."""
-    names = [candidate for name in model_files(_voice()) for candidate in (name, f"{name}.part")]
+    names = [candidate for name in model_files(current_voice()) for candidate in (name, f"{name}.part")]
     return sum((TTS_DIR / name).stat().st_size for name in names if (TTS_DIR / name).exists())
 
 
 def _download_models() -> None:
     TTS_DIR.mkdir(parents=True, exist_ok=True)
-    voice = _voice()
+    voice = current_voice()
     for name in model_files(voice):
         path = TTS_DIR / name
         if not path.exists():
@@ -79,7 +118,7 @@ model_download = Download(
     is_ready=lambda: _is_downloaded(),
     fetch=lambda: _download_models(),
     measure=lambda: _downloaded_bytes(),
-    total=EXPECTED_BYTES if _voice() == DEFAULT_VOICE else None,
+    size=lambda: VOICES[voice].size if (voice := current_voice()) in VOICES else None,
 )
 
 
@@ -98,7 +137,7 @@ def _get_voice(voice: str) -> PiperVoice:
 
 def synthesize(text: str) -> bytes:
     """Return WAV audio of the text spoken in German."""
-    voice = _voice()
+    voice = current_voice()
     # Lines repeat across sessions, so keep each rendered clip on disk.
     key = hashlib.sha256(f"{voice}\n{text}".encode()).hexdigest()
     cached = CACHE_DIR / f"{key}.wav"

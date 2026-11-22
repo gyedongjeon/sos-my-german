@@ -168,7 +168,7 @@ def test_voice_progress_counts_the_partly_downloaded_file(client):
     speech.TTS_DIR.mkdir(parents=True)
     (speech.TTS_DIR / "de_DE-thorsten-high.onnx.part").write_bytes(b"x" * 1234)
     voice = next(m for m in client.get("/api/models").json() if m["id"] == "voice")
-    assert (voice["downloaded"], voice["total"]) == (1234, speech.EXPECTED_BYTES)
+    assert (voice["downloaded"], voice["total"]) == (1234, speech.VOICES[speech.DEFAULT_VOICE].size)
 
 
 def test_speech_model_progress_counts_what_is_on_disk(client):
