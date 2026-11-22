@@ -20,6 +20,7 @@ from .similar_videos import router as similar_videos_router
 from .speech import synthesize
 from .topics import router as topics_router
 from .transcribe import transcribe
+from .translations import router as translations_router
 from .videos import router as videos_router
 
 
@@ -40,6 +41,7 @@ app.include_router(settings_router)
 app.include_router(topics_router)
 app.include_router(videos_router)
 app.include_router(similar_videos_router)
+app.include_router(translations_router)
 
 
 class TranscriptResponse(BaseModel):

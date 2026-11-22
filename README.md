@@ -21,13 +21,13 @@ from which it was made, and [SOS My Interview](https://github.com/gyedongjeon/so
 - **A summary at the end**: wrap a conversation up to see how it went: what you did well, what to work on next, and a few expressions worth trying next time.
 - **40 topics in 9 categories**: everyday chat, work, school, shopping, food, travel, services, home, and giving your opinion.
 - **Sentence patterns by level**: 100 patterns from A1 to C2. You see a sentence in your own language and say it in German, five sentences a round, and each one is checked.
-- **Study with YouTube videos**: paste a link and listen to the video one sentence at a time, with repeat, slower speeds, and the text hidden or shown. Say a sentence after the speaker to see which words came through, and search all your videos for a phrase to hear how it is used. Mark an expression in a sentence to turn it into a pattern of your own and practise it. Videos are tagged with a level from A1 to C2 and can be listed level by level, and a video can suggest others like it at a similar level.
+- **Study with YouTube videos**: paste a link and listen to the video one sentence at a time, with repeat, slower speeds, the text hidden or shown, and a translation into your language turned on or off. Say a sentence after the speaker to see which words came through, and search all your videos for a phrase to hear how it is used. Mark an expression in a sentence to turn it into a pattern of your own and practise it. Videos are tagged with a level from A1 to C2 and can be listed level by level, and a video can suggest others like it at a similar level.
 - **Your own topics**: add the situations you need (a job interview, renting a car, a call with a client) next to the built-in ones.
 - **Practise your corrections**: every fix is collected on the Corrections page, where you say the better sentence aloud until it comes out right.
 - **History**: every conversation is saved as you have it, with its corrections, so you can read it and hear it again.
 - **Explanations in your language**: corrections are explained in Korean, English, Japanese, Chinese, and more; the conversation stays in German. Your partner says "du" or "Sie" as the situation calls for.
 - **Topics from what you read**: paste a link to an article or a speech, or its text, and get a topic to discuss it, with a short summary to talk from.
-- **Private by default**: speech-to-text and your partner's voice run locally, and your data stays on your computer. Only the text of the conversation, and a text or page you make a topic from, goes to the LLM provider you choose, with your own API key. Videos are streamed from YouTube; a part of a video's subtitles is sent to estimate its level and to find videos like it, and a sentence you make a pattern from.
+- **Private by default**: speech-to-text and your partner's voice run locally, and your data stays on your computer. Only the text of the conversation, and a text or page you make a topic from, goes to the LLM provider you choose, with your own API key. Videos are streamed from YouTube; a part of a video's subtitles is sent to estimate its level and to find videos like it, and a sentence you make a pattern from. Turning on a video's translation sends all its subtitles.
 
 The app runs locally for a single user; there is no account, server, or deployment.
 
@@ -167,6 +167,14 @@ heard. The recording is transcribed locally and compared with the sentence word 
 LLM): the page shows the share of words that came through and marks the ones that did not.
 Punctuation and capitals are ignored, "geht's" equals "geht es", "ß" equals "ss", and "drei"
 equals "3". Each sentence keeps its best score.
+
+**Translation.** "Translation" on a video's page shows each sentence in your feedback
+language under the German. The first time it is turned on for a video, all of the video's
+sentences are sent to the LLM, a few dozen at a time, and translated (about ten seconds for a
+twenty-minute video); the translations are kept in the local database, so the video opens with
+them afterwards without asking the LLM again. Each feedback language is translated on its own.
+With German as the feedback language there is nothing to translate into. A translation follows
+the sentences as they are cut, so a sentence cut short by subtitles is translated as it stands.
 
 **Search.** The search box on the Videos page looks for a word or phrase in the subtitles of
 all saved videos, with capitals ignored (umlauts too); a result opens its video at that sentence, so you can hear how the phrase is

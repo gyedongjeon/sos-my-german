@@ -149,3 +149,19 @@ def test_searches_for_videos_like_a_saved_one_are_a_few_short_phrases(client, mo
     assert response.status_code == 200, response.text
     assert 1 <= len(searched) <= 3
     assert all(1 <= len(query.split()) <= 10 for query in searched)
+
+
+def test_the_sentences_of_a_video_are_translated_into_the_learners_language(client, monkeypatch):
+    from app import videos
+    from app.videos import Snippet
+
+    client.put("/api/settings", json={"feedback_language": "Korean"})
+    said = ["Guten Morgen und herzlich willkommen.", "Heute lernen wir, wie man sich verabschiedet.", "Tschüss, bis bald!"]
+    monkeypatch.setattr(videos, "_transcript", lambda video_id: ([Snippet(i * 4.0, 4.0, s) for i, s in enumerate(said)], "de", False))
+    monkeypatch.setattr(videos, "_about", lambda video_id: ("Begrüßungen", "Ein Kanal"))
+    video = client.post("/api/videos", json={"url": "https://youtu.be/UF8uR6Z6KLc"}).json()
+    response = client.post(f"/api/videos/{video['id']}/translations")
+    assert response.status_code == 200, response.text
+    lines = response.json()["lines"]
+    assert [line["line"] for line in lines] == [line["id"] for line in video["lines"]]
+    assert all(re.search("[가-힣]", line["text"]) for line in lines), lines
