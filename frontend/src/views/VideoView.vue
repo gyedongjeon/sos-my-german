@@ -180,6 +180,15 @@ async function load() {
   await player.open(video.value.video_id)
 }
 
+// The translation is asked for when it is turned on, and for each video opened while it is on.
+function translateIfShown() {
+  const id = video.value?.id
+  if (id === undefined || !videos.showTranslation) return
+  if (videos.translatedFor === id && (videos.translating || Object.keys(videos.translations).length)) return
+  videos.translate(id)
+}
+watch(() => [videos.showTranslation, video.value?.id], translateIfShown)
+
 watch(rate, (now) => player.setRate(now))
 watch(player.ready, (now) => now && player.setRate(rate.value))
 // With the text hidden, the subtitles on the video itself are hidden as well.
@@ -290,6 +299,10 @@ onBeforeUnmount(() => recorder.release())
             <input v-model="showText" type="checkbox" class="toggle toggle-sm" />
             Show the text
           </label>
+          <label class="label cursor-pointer gap-2 text-sm" title="Each sentence in your feedback language">
+            <input v-model="videos.showTranslation" type="checkbox" class="toggle toggle-sm" />
+            Translation
+          </label>
           <button v-if="recorder.recording.value" class="btn btn-error btn-sm" @click="stopShadowing">
             <span class="inline-block size-2 animate-pulse rounded-full bg-current"></span>
             Stop
@@ -311,6 +324,14 @@ onBeforeUnmount(() => recorder.release())
           >
             Make a pattern
           </button>
+        </div>
+
+        <p v-if="videos.showTranslation && videos.translating" class="mt-2 flex items-center gap-2 text-sm text-base-content/60">
+          <MorseSignal animated /> Translating the sentences… The first time takes a moment.
+        </p>
+        <div v-else-if="videos.showTranslation && videos.translateError" role="alert" class="alert alert-error alert-soft mt-2">
+          {{ videos.translateError }}
+          <button class="btn btn-sm" @click="video && videos.translate(video.id)">Try again</button>
         </div>
 
         <div v-if="marking !== null" class="mt-2 rounded-box bg-base-100 p-3 text-sm">
@@ -379,8 +400,15 @@ onBeforeUnmount(() => recorder.release())
             @click="play(i)"
           >
             <span class="w-12 shrink-0 text-xs text-base-content/50 tabular-nums">{{ clock(line.start) }}</span>
-            <span v-if="showText">{{ line.text }}</span>
-            <span v-else class="italic text-base-content/40">Sentence {{ i + 1 }}</span>
+            <span class="flex flex-col">
+              <span v-if="showText">{{ line.text }}</span>
+              <span v-else class="italic text-base-content/40">Sentence {{ i + 1 }}</span>
+              <span
+                v-if="videos.showTranslation && videos.translatedFor === video.id && videos.translations[line.id]"
+                class="text-sm text-base-content/60"
+                >{{ videos.translations[line.id] }}</span
+              >
+            </span>
             <span
               v-if="line.best !== null"
               class="badge badge-soft badge-sm ml-auto shrink-0"

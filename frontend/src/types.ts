@@ -197,6 +197,12 @@ export interface Video extends Omit<VideoSummary, 'sentences'> {
   lines: SavedVideoLine[]
 }
 
+/** A video's sentences in the learner's language, by the id of each sentence. */
+export interface VideoTranslation {
+  language: string
+  lines: { line: number; text: string }[]
+}
+
 export type Phase = 'idle' | 'transcribing' | 'thinking' | 'reviewing'
 
 /** A model the app downloads on first use, and how far its download is. */

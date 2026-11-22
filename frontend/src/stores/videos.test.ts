@@ -224,3 +224,41 @@ describe('suggested videos', () => {
     expect(store.suggestions).toEqual([])
   })
 })
+
+describe('translations', () => {
+  const TRANSLATED = { language: 'Korean', lines: [{ line: 11, text: '하나.' }, { line: 12, text: '둘.' }] }
+
+  it('translates the sentences of a video, by line', async () => {
+    const backend = fakeBackend({ 'POST /videos/2/translations': [200, TRANSLATED] })
+    const store = useVideosStore()
+    const pending = store.translate(2)
+    expect(store.translating).toBe(true)
+    await pending
+    expect(store.translations).toEqual({ 11: '하나.', 12: '둘.' })
+    expect(store.translatedFor).toBe(2)
+    expect(store.translating).toBe(false)
+    expect(backend.asked).toEqual(['POST /videos/2/translations'])
+  })
+
+  it('says why a video could not be translated', async () => {
+    fakeBackend({ 'POST /videos/2/translations': [502, { detail: 'Could not translate the sentences: timeout' }] })
+    const store = useVideosStore()
+    await store.translate(2)
+    expect(store.translateError).toContain('timeout')
+    expect(store.translations).toEqual({})
+    expect(store.translating).toBe(false)
+  })
+
+  it('ignores a translation that comes after another video asked for its own', async () => {
+    fakeBackend({
+      'POST /videos/2/translations': [200, TRANSLATED],
+      'POST /videos/3/translations': [200, { language: 'Korean', lines: [{ line: 21, text: '셋.' }] }],
+    })
+    const store = useVideosStore()
+    const first = store.translate(2)
+    await store.translate(3)
+    await first
+    expect(store.translatedFor).toBe(3)
+    expect(store.translations).toEqual({ 21: '셋.' })
+  })
+})

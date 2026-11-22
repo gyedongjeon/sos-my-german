@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { api } from '../api'
-import type { Video, VideoHit, VideoSuggestion, VideoSummary } from '../types'
+import type { Video, VideoHit, VideoSuggestion, VideoSummary, VideoTranslation } from '../types'
 
 export const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 /** What the videos without a level are listed under, and the choice that shows every video. */
@@ -26,6 +26,13 @@ export const useVideosStore = defineStore('videos', {
     suggestedFor: null as number | null,
     suggesting: false,
     suggestError: '',
+    // Whether the sentences are shown with their translation; kept while the app is open.
+    showTranslation: false,
+    // A video's sentences in the learner's language by line id, and the video they belong to.
+    translations: {} as Record<number, string>,
+    translatedFor: null as number | null,
+    translating: false,
+    translateError: '',
   }),
   getters: {
     /** The levels that have videos, easiest first, then the videos without one. */
@@ -118,6 +125,23 @@ export const useVideosStore = defineStore('videos', {
         if (this.suggestedFor === id) this.suggestError = (e as Error).message
       } finally {
         if (this.suggestedFor === id) this.suggesting = false
+      }
+    },
+
+    /** Has a video's sentences translated into the learner's language; they are kept by the
+     * backend, so only the first time takes the model's time. */
+    async translate(id: number) {
+      this.translatedFor = id
+      this.translations = {}
+      this.translateError = ''
+      this.translating = true
+      try {
+        const found = await api<VideoTranslation>(`/videos/${id}/translations`, { method: 'POST' })
+        if (this.translatedFor === id) this.translations = Object.fromEntries(found.lines.map((l) => [l.line, l.text]))
+      } catch (e) {
+        if (this.translatedFor === id) this.translateError = (e as Error).message
+      } finally {
+        if (this.translatedFor === id) this.translating = false
       }
     },
 
