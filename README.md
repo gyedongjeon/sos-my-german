@@ -152,7 +152,8 @@ pattern; the sentences themselves are not stored. With German as the feedback la
 short instruction in German ("Sag, dass du bereust, …") is shown in place of a sentence to translate.
 
 ### Videos
-![A video in SOS My German, cut into sentences, each with its Korean translation](docs/images/video.png)
+![A video in SOS My German, its sentences each with a Korean translation](docs/images/video.png)
+*Video: ["Künstliche Intelligenz in 2 Minuten erklärt: Was ist eigentlich KI?"](https://www.youtube.com/watch?v=sDt5bTQBJis) by KI-Campus, [CC BY](https://creativecommons.org/licenses/by/3.0/), shown in YouTube's player.*
 
 The Videos page takes a link to a YouTube video that has German subtitles. The video is played
 by YouTube's own embedded player, inside the app, and is never downloaded. The app reads the
