@@ -149,3 +149,24 @@ def test_searches_for_videos_like_a_saved_one_are_a_few_short_phrases(client, mo
     assert response.status_code == 200, response.text
     assert 1 <= len(searched) <= 3
     assert all(1 <= len(query.split()) <= 10 for query in searched)
+
+
+def test_automatic_subtitles_without_punctuation_are_cut_into_sentences(client, monkeypatch):
+    from app import videos
+    from app.videos import Snippet
+
+    # As YouTube's automatic German subtitles come: no punctuation, a recognition error ("baldm").
+    said = [
+        "hallo ich bin Kari und ich bin Janusch und",
+        "wir zeigen euch heute die wichtigsten",
+        "Begrüßungen los geht's wir fangen an mit",
+        "Hallo und Tschüss bis baldm",
+    ]
+    monkeypatch.setattr(videos, "_transcript", lambda video_id: ([Snippet(i * 3.0, 3.0, s) for i, s in enumerate(said)], "de", True))
+    monkeypatch.setattr(videos, "_about", lambda video_id: ("Begrüßungen", "Ein Kanal"))
+    response = client.post("/api/videos", json={"url": "https://youtu.be/aRlakaPVrEw"})
+    assert response.status_code == 201, response.text
+    lines = [line["text"] for line in response.json()["lines"]]
+    # Cut at sentence ends, not at the subtitle lines, with every word said kept as it was.
+    assert lines != said and any(re.search(r"[.!?]$", line) for line in lines), lines
+    assert [w.strip(".,!?:;").lower() for line in lines for w in line.split()] == " ".join(said).lower().split()

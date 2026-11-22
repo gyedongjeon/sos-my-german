@@ -4,9 +4,12 @@ here, cut into sentences, so each sentence can be listened to on its own."""
 import json
 import re
 import sqlite3
+import string
 import urllib.parse
 import urllib.request
-from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, replace
+from difflib import SequenceMatcher
 from html import unescape
 
 from fastapi import APIRouter, HTTPException, Query, Response
@@ -43,6 +46,10 @@ WORDS_PER_END = 40
 PAUSE = 1.5
 # A sentence longer than this is cut at its next comma, and at the hard limit without one.
 LONG, TOO_LONG = 40, 60
+# Subtitles without punctuation are punctuated by the model this many words at a time, at most,
+# a few parts at once.
+PART = 300
+PARALLEL = 4
 
 
 class NoSubtitles(Exception):
@@ -56,6 +63,9 @@ class Snippet:
     start: float
     duration: float
     text: str
+    # Left without punctuation in subtitles that were punctuated: it ends a sentence of its own,
+    # as each line does in subtitles without any punctuation.
+    unpunctuated: bool = False
 
 
 class Line(BaseModel):
@@ -221,6 +231,124 @@ def _clean(text: str) -> str:
     return " ".join(NOISE.sub(" ", unescape(text)).split())
 
 
+class Punctuated(BaseModel):
+    text: str = Field(min_length=1, description="The same words, with punctuation and capitals.")
+
+
+PUNCTUATION_PROMPT = """\
+You get a stretch of automatic German subtitles: the words that were said, with no punctuation
+and few capitals. Add the punctuation (full stops, commas, question marks, exclamation marks)
+and the capitals that a careful transcript would have, so that it can be cut into sentences.
+
+Keep every word exactly as it is and in the same order: do not add, remove, join, split,
+correct, or translate any word, even one that looks wrong. Change only capitals and the marks
+attached to the words. The stretch may begin or end in the middle of a sentence; leave it open
+there.
+
+Reply with a single JSON object matching this schema, and nothing else:
+{schema}"""
+
+# What may stand around a word besides its letters: compared without it, words are the same.
+MARKS = string.punctuation + "„“”‚‘’…–—«»"
+# The model's reply is used for a part when at least this share of the part's words are found in
+# it unchanged. The model tends to correct recognition errors ("baldm" to "bald") however it is
+# told not to; those words keep their own spelling and take the model's marks.
+MATCHED = 0.9
+
+
+def _bare(word: str) -> str:
+    return word.strip(MARKS).casefold()
+
+
+def _trailing(written: str) -> str:
+    """The marks after a word: "bald." gives "."."""
+    return written[len(written.rstrip(MARKS)) :]
+
+
+def _marked(word: str, written: str) -> str:
+    """A word as it was said, with the capital and the marks after it that the model gave it."""
+    bare = word.rstrip(MARKS) or word
+    if written[:1].isupper():
+        bare = bare[:1].upper() + bare[1:]
+    return bare + _trailing(written)
+
+
+def _carry(words: list[str], written: list[str]) -> list[str] | None:
+    """The words with the punctuation and capitals of the model's version of them; None when it
+    is too unlike them to tell which mark belongs to which word."""
+    said, wrote = [_bare(w) for w in words], [_bare(w) for w in written]
+    matcher = SequenceMatcher(None, said, wrote, autojunk=False)
+    if sum(block.size for block in matcher.get_matching_blocks()) < MATCHED * len(words):
+        return None
+    result = list(words)
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == "equal" or (tag == "replace" and i2 - i1 == j2 - j1):
+            for k in range(i2 - i1):
+                result[i1 + k] = _marked(words[i1 + k], written[j1 + k])
+        elif j2 > j1:
+            # Words joined, split, added, or dropped: the marks after the last of the model's
+            # words go after the last word said there.
+            last = i2 - 1 if i2 > i1 else i1 - 1
+            if last >= 0:
+                result[last] = (result[last].rstrip(MARKS) or result[last]) + _trailing(written[j2 - 1])
+    return result
+
+
+def _punctuate_part(words: list[str]) -> list[str] | None:
+    """The words with punctuation and capitals, or None when the model's reply cannot be used."""
+    try:
+        reply = complete(
+            PUNCTUATION_PROMPT.format(schema=Punctuated.model_json_schema()),
+            " ".join(words),
+            max_tokens=8000,
+            response_format={"type": "json_object"},
+            reasoning_effort="low",
+            timeout=60,
+        )
+        written = parse_json_reply(reply, Punctuated).text.split()
+    except LLMError:
+        return None
+    # A dash or a quotation mark on its own belongs to no word.
+    return _carry(words, [word for word in written if _bare(word)])
+
+
+def punctuate(snippets: list[Snippet]) -> list[Snippet]:
+    """Subtitles without punctuation, such as YouTube's automatic German ones, punctuated by the
+    model; each subtitle line keeps its words and its time. A part whose words the model changed,
+    and every part when no model can be asked, is kept as it was. Punctuated subtitles are
+    returned as they are."""
+    texts = [_clean(snippet.text) for snippet in snippets]
+    words = [word for text in texts for word in text.split()]
+    if not words or sum(1 for word in words if SENTENCE_END.search(word)) * WORDS_PER_END >= len(words):
+        return snippets
+    # Parts end with a subtitle line, so each line's words come back from one part.
+    parts: list[list[int]] = [[]]
+    size = 0
+    for i, text in enumerate(texts):
+        count = len(text.split())
+        if parts[-1] and size + count > PART:
+            parts.append([])
+            size = 0
+        parts[-1].append(i)
+        size += count
+    with ThreadPoolExecutor(max_workers=PARALLEL) as pool:
+        written = list(pool.map(lambda part: _punctuate_part([w for i in part for w in texts[i].split()]), parts))
+    if all(punctuated is None for punctuated in written):
+        return snippets
+    result = list(snippets)
+    for part, punctuated in zip(parts, written, strict=True):
+        if punctuated is None:
+            for i in part:
+                result[i] = replace(snippets[i], unpunctuated=True)
+            continue
+        at = 0
+        for i in part:
+            count = len(texts[i].split())
+            result[i] = Snippet(snippets[i].start, snippets[i].duration, " ".join(punctuated[at : at + count]))
+            at += count
+    return result
+
+
 def sentences(snippets: list[Snippet]) -> list[Line]:
     """Cut subtitles into sentences. A subtitle line breaks where it fits on the screen, not
     where a sentence ends, so the lines are joined and cut again at the sentence ends; a
@@ -229,6 +357,8 @@ def sentences(snippets: list[Snippet]) -> list[Line]:
     kept = [(snippet, text) for snippet, text in kept if text]
     # (word, the time it is said at, the time its subtitle line ends)
     words: list[tuple[str, float, float]] = []
+    # The words after which a sentence ends whatever they are: the last of an unpunctuated line.
+    line_ends: set[int] = set()
     for i, (snippet, text) in enumerate(kept):
         end = snippet.start + snippet.duration
         if i + 1 < len(kept) and snippet.start < kept[i + 1][0].start < end:
@@ -239,6 +369,8 @@ def sentences(snippets: list[Snippet]) -> list[Line]:
             at = text.index(word, at)
             words.append((word, snippet.start + (end - snippet.start) * at / len(text), end))
             at += len(word)
+        if snippet.unpunctuated:
+            line_ends.add(len(words) - 1)
     ends = sum(1 for word, _, _ in words if SENTENCE_END.search(word))
     if ends * WORDS_PER_END < len(words):
         return [
@@ -248,14 +380,14 @@ def sentences(snippets: list[Snippet]) -> list[Line]:
 
     lines: list[Line] = []
     current: list[tuple[str, float, float]] = []
-    for word in words:
+    for at, word in enumerate(words):
         if current and word[1] - current[-1][2] >= PAUSE:
             lines.append(Line(start=current[0][1], end=current[-1][2], text=" ".join(w for w, _, _ in current)))
             current = []
         current.append(word)
         text = word[0]
         full = bool(SENTENCE_END.search(text)) and text.lower() not in ABBREVIATIONS
-        if full or len(current) >= TOO_LONG or (len(current) >= LONG and text.endswith(",")):
+        if full or at in line_ends or len(current) >= TOO_LONG or (len(current) >= LONG and text.endswith(",")):
             lines.append(Line(start=current[0][1], end=current[-1][2], text=" ".join(w for w, _, _ in current)))
             current = []
     if current:
@@ -347,7 +479,7 @@ def add_video(body: NewVideo, response: Response) -> Video:
         snippets, language, generated = _transcript(video_id)
     except NoSubtitles as e:
         raise HTTPException(status_code=422, detail=str(e)) from e
-    lines = sentences(snippets)
+    lines = sentences(punctuate(snippets))
     if not lines:
         raise HTTPException(status_code=422, detail="This video has no German subtitles.")
     title, channel = _about(video_id)
