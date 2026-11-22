@@ -8,6 +8,8 @@
 말문이 막히나요? **독일어 말하기**를 내 컴퓨터에서 연습하는 앱입니다. 주제를 고르고 AI 대화 상대와
 소리 내어 이야기하면, 상대가 음성으로 답하고 내가 한 말을 바로바로 고쳐 줍니다.
 
+![SOS My German 대화 화면: 내가 한 말, 한국어로 설명된 교정, 상대의 다음 말](docs/images/practice.png)
+
 [SOS My English](https://github.com/gyedongjeon/sos-my-english)를 바탕으로 만든 독일어판으로, [SOS My Interview](https://github.com/gyedongjeon/sos-my-interview)와 같은 SOS 시리즈입니다.
 
 ## 주요 기능
@@ -73,6 +75,8 @@ Intel Mac, Linux용 설치 파일은 아직 없습니다. [소스에서 실행](
 Google Gemini, Claude, OpenAI, OpenRouter 등을 쓸 수 있습니다. API 키는 내 컴퓨터에만 저장되고, 저장한 뒤에는 화면에 다시 표시되지 않으며, 선택한 서비스로만 전송됩니다.
 
 ## 사용 방법
+![SOS My German 홈 화면: 주제 목록](docs/images/home.png)
+
 1. **Conversation**에서 카테고리를 누르고 주제를 고르면 상대가 첫마디를 읽어 줍니다. 못 들었다면 "Replay", 글자로 보고 싶다면 "Show text"를 누릅니다.
 2. "Start speaking"을 누르고 말한 뒤 "Stop"을 누릅니다.
 3. 내가 한 말과 교정이 나오고, 상대가 이어서 말합니다. 같은 식으로 대화를 이어 갑니다.
@@ -82,6 +86,10 @@ Google Gemini, Claude, OpenAI, OpenRouter 등을 쓸 수 있습니다. API 키�
 7. 원하는 주제가 없으면 **Conversation** 아래쪽의 "+ Add your own topic"으로 직접 만듭니다. 상황은 한국어로 적어도 되고, 상대의 첫마디는 비워 두면 자동으로 써 줍니다. "From a link or text"를 고르면 기사나 연설문의 링크 또는 글을 붙여 넣어 주제를 만들 수 있습니다(영상 링크와 로그인이 필요한 페이지는 읽지 못하니 글을 붙여 넣어 주세요).
 8. **Patterns**에서 레벨(A1~C2)과 패턴을 고르면, 내 언어로 된 문장이 나옵니다. "Say it in German"을 누르고 독일어로 말하면 맞았는지와 더 나은 문장을 알려 줍니다.
 9. **Videos**에 독일어 자막이 있는 유튜브 영상 링크를 붙여 넣으면 자막이 문장 단위로 나뉩니다. 문장을 누르면 그 부분만 재생됩니다. "Translation"을 켜면 문장마다 피드백 언어로 된 번역이 아래에 나옵니다(영상마다 처음 한 번만 AI로 번역하고, 그다음부터는 저장된 번역을 씁니다). "Say it after"로 방금 들은 문장을 따라 말하면 어떤 단어가 제대로 들렸는지 보여 주고, 검색 상자로 저장한 모든 영상의 자막에서 표현을 찾을 수 있습니다. "Make a pattern"으로 문장에서 연습하고 싶은 표현의 첫 단어와 끝 단어를 누르면 내 패턴이 만들어져 **Patterns**의 "Yours"에서 연습할 수 있습니다. 영상을 추가하면 A1~C2 수준이 자동으로 붙고(영상 화면에서 직접 바꿀 수 있습니다), 목록에서 수준별로 골라 볼 수 있습니다. 영상 화면의 "Find similar videos"를 누르면 비슷한 수준의 비슷한 유튜브 영상을 찾아 추천해 주고, "Add"로 바로 추가할 수 있습니다. 영상은 유튜브 플레이어로 재생되며 내려받지 않고, 자막은 이 컴퓨터에 저장됩니다. 유튜브 자동 자막에는 문장 부호가 없어서, 영상을 추가할 때 AI가 문장 부호만 붙여 문장 단위로 나눕니다(단어는 바꾸지 않고, 이때 자막 전체가 AI 서비스로 전송됩니다). 이 기능이 생기기 전에 추가한 영상은 지우고 다시 추가하면 문장 단위로 나뉩니다.
+
+   ![SOS My German 영상 화면: 문장마다 붙은 한국어 번역](docs/images/video.png)
+   *영상: KI-Campus의 ["Künstliche Intelligenz in 2 Minuten erklärt: Was ist eigentlich KI?"](https://www.youtube.com/watch?v=sDt5bTQBJis), [CC BY](https://creativecommons.org/licenses/by/3.0/), 유튜브 플레이어로 재생.*
+
 10. 지난 대화는 **History**에서 다시 볼 수 있고, 필요 없는 대화는 거기서 지울 수 있습니다.
 
 ## 개발과 기여
