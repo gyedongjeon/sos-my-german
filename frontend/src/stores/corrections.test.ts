@@ -1,7 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SavedCorrection } from '../types'
-import { useCorrectionsStore } from './corrections'
+import { source, useCorrectionsStore } from './corrections'
 
 const saved = (id: string, improved: string, practiced = 0): SavedCorrection => ({
   id,
@@ -126,5 +126,15 @@ describe('corrections', () => {
     replies['/corrections/p2'] = [204, null]
     await store.remove('p2')
     expect(store.items.map((c) => c.id)).toEqual(['m5'])
+  })
+})
+
+describe('the source of a correction', () => {
+  it('is the conversation or the pattern it comes from', () => {
+    expect(source(saved('m5', 'x'))).toEqual({ name: 'conversation', params: { id: 1 } })
+    expect(source({ ...saved('p2', 'x'), conversation_id: null, pattern_id: 'should-have' })).toEqual({
+      name: 'pattern',
+      params: { id: 'should-have' },
+    })
   })
 })

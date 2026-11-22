@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import type { RouteLocationRaw } from 'vue-router'
 import { api } from '../api'
 import type { SavedCorrection } from '../types'
 
@@ -14,6 +15,12 @@ interface Checked {
   matched: boolean
   missing: string[]
   practiced: number
+}
+
+/** Where a correction comes from: its conversation or its pattern. */
+export function source(c: SavedCorrection): RouteLocationRaw {
+  if (c.pattern_id !== null) return { name: 'pattern', params: { id: c.pattern_id } }
+  return { name: 'conversation', params: { id: c.conversation_id } }
 }
 
 /** The corrections of all saved conversations, practised by saying the better sentence aloud. */

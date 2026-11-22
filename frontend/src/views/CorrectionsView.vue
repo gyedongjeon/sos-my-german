@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import MorseSignal from '../components/MorseSignal.vue'
 import { micProblem, useRecorder } from '../composables/useRecorder'
 import { useSpeech } from '../composables/useSpeech'
-import { useCorrectionsStore } from '../stores/corrections'
+import { source, useCorrectionsStore } from '../stores/corrections'
 
 // Every correction from the saved conversations, to practise by saying the better sentence aloud.
 const store = useCorrectionsStore()
@@ -114,11 +114,7 @@ onBeforeUnmount(() => {
               <span v-if="c.practiced" class="badge badge-success badge-soft">Said right ×{{ c.practiced }}</span>
               <RouterLink
                 class="link ml-auto text-xs text-base-content/60"
-                :to="
-                  c.pattern_id !== null
-                    ? { name: 'pattern', params: { id: c.pattern_id } }
-                    : { name: 'conversation', params: { id: c.conversation_id } }
-                "
+                :to="source(c)"
               >
                 From “{{ c.title }}”
               </RouterLink>
