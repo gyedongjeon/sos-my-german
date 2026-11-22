@@ -45,9 +45,9 @@ phrases: up to {max_items} natural German expressions you did not use but could 
 this conversation. "german" is the expression as it would be said; "note" says what it means
 or when to use it.
 
-Write "summary", "strengths", "focus", and every "note" in {language}, not in German, even
-though the conversation was in German: the learner reads them in {language}. German words and
-examples may be quoted inside them. Only "german" is written in German.
+Write "summary", "strengths", "focus", and every "note" in {language}, the learner's own
+language, whatever language the conversation was in: the learner reads them in {language}.
+German words and examples may be quoted inside them. Only "german" is always written in German.
 
 Reply with a single JSON object matching this schema, and nothing else:
 {schema}"""

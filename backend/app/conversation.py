@@ -55,8 +55,9 @@ what they said, give the better version, and explain why in one or two sentences
 already fine, or the only difference would be punctuation or capitals, use null; do not
 invent a problem. In "explanation", talk about what to say, not how to write it.
 
-Write "explanation" in {language}: the learner reads it in {language}, even though the
-conversation is in German, and German examples may be quoted inside it. Keep "reply",
+Write "explanation" in {language}, the learner's own language, whatever language the
+conversation is in: the learner reads it in {language}, and German examples may be quoted inside
+it. Keep "reply",
 "original", and "improved" in German.
 
 Reply with a single JSON object matching this schema, and nothing else:

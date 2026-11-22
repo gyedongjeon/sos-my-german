@@ -108,7 +108,8 @@ Write {count} different sentences that each need this pattern. The learner sees 
   enough to say in one breath.
 - "prompt" is the same sentence in natural {language}, as a native speaker would say it, not a
   word-for-word translation. {cue}
-- "note" says in one or two sentences of {language} when this pattern is used.
+- "note" says in one or two sentences when this pattern is used. Write it in {language}, the
+  learner's own language; German words may be quoted inside it.
 
 Reply with a single JSON object matching this schema, and nothing else:
 {schema}"""
@@ -140,9 +141,10 @@ improved: the sentence as it should be said, in German. Stay as close to the lea
 words as a correct sentence allows; when it was correct, repeat what the learner said. When
 the learner said something that means something else than the shown sentence, give the model
 answer instead.
-explanation: when it was not correct, one or two sentences in {language} on what to change
-and why, talking about what to say, not how to write it; when the meaning was different, say
-so first. When it was correct, null.
+explanation: when it was not correct, one or two sentences on what to change and why, talking
+about what to say, not how to write it; when the meaning was different, say so first. When it
+was correct, null. Write it in {language}, the learner's own language, whatever language the
+sentence is in; German words may be quoted inside it.
 
 Reply with a single JSON object matching this schema, and nothing else:
 {schema}"""
