@@ -102,6 +102,9 @@ The app opens on the Settings page the first time.
 2. **AI model and API key**: choose a provider and model and paste that provider's API key. It is
    saved and checked with a test request.
 
+Under Settings you can also choose your partner's voice, male or female; see
+[Text-to-speech](#text-to-speech).
+
 Replies and corrections are written by an LLM through
 [LiteLLM](https://docs.litellm.ai/docs/providers), so any supported provider works (Gemini,
 Claude, OpenAI, OpenRouter, a local Ollama model, ...). Both settings can be changed any time
@@ -242,9 +245,16 @@ clearly they were pronounced. Allow microphone access when asked.
 Your partner's lines are read aloud with a local [Piper](https://github.com/OHF-Voice/piper1-gpl)
 voice, `de_DE-thorsten-high` from [Piper's voices](https://huggingface.co/rhasspy/piper-voices).
 Its files (~114 MB) are downloaded in the background when the app is first opened, and rendered
-clips are cached in `backend/data/tts/cache/`. Set the `TTS_VOICE` environment variable to the
-name of another Piper voice (for example `de_DE-kerstin-low`) to change it. Kokoro, the voice of
-SOS My English, has no German voice. While
+clips are cached in `backend/data/tts/cache/`. Kokoro, the voice of SOS My English, has no German
+voice.
+
+**Choosing the voice.** Under Settings, "Partner's voice" offers the German Piper voices that have
+one speaker: Thorsten (male, the only one in high quality), Kerstin and Ramona (female), Eva
+(female, in the lowest quality), and Karlsson and Pavoque (male). A voice is downloaded the
+first time it is chosen (21 to 114 MB), with its progress shown under the navigation bar, and
+"Hear it" plays a sample. Downloaded voices stay in `tts/`. Without a choice, the
+`TTS_VOICE` environment variable names the voice, which may be any Piper voice; a choice made
+under Settings comes first. While
 the download is running, or if the backend cannot produce audio, the browser's built-in voice is
 used instead.
 
