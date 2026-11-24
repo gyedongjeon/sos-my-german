@@ -1,5 +1,11 @@
 # SOS My German
 
+> [!IMPORTANT]
+> **SOS My German는 [SOS My Language](https://github.com/gyedongjeon/sos-my-language)로 합쳐졌습니다.** 이제 앱 하나로 영어와 독일어를 연습합니다.
+> 처음 열 때 연습할 언어를 고르고, 언제든 다른 언어로 바꿀 수 있습니다. 새 버전은 그쪽에서 나오고,
+> 이 저장소는 더 이상 개발하지 않습니다. [SOS My Language 내려받기](https://github.com/gyedongjeon/sos-my-language/releases/latest).
+> 새 앱은 별도의 앱이라 빈 상태로 시작합니다. SOS My German에 저장한 내용은 이 앱에 그대로 남고 옮겨지지 않습니다.
+
 [English](README.md) | **한국어**
 
 [![Release](https://img.shields.io/github/v/release/gyedongjeon/sos-my-german)](https://github.com/gyedongjeon/sos-my-german/releases/latest)

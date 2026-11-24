@@ -1,5 +1,12 @@
 # SOS My German
 
+> [!IMPORTANT]
+> **SOS My German has moved into [SOS My Language](https://github.com/gyedongjeon/sos-my-language).** One app now teaches English and German:
+> you choose the language to practise on the first start and can go over to another at any time.
+> New versions are released there, and this repository is no longer developed.
+> [Download SOS My Language](https://github.com/gyedongjeon/sos-my-language/releases/latest). It is a separate app that starts empty:
+> what you saved in SOS My German stays in this app and is not carried over.
+
 **English** | [한국어](README.ko.md)
 
 [![Release](https://img.shields.io/github/v/release/gyedongjeon/sos-my-german)](https://github.com/gyedongjeon/sos-my-german/releases/latest)
